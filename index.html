@@ -182,12 +182,18 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
 <main class="wrap">
   <!-- ================= VISÃO DOCENTE ================= -->
   <section id="viewDocente">
+    <div class="card hidden" id="cardExemplo" style="border-left:5px solid var(--broto)">
+      <h2>Exemplo preenchido</h2>
+      <p class="sub" style="margin:4px 0 10px">Este é um docente fictício com uma atividade em cada categoria, para você ver como fica. Abra as categorias, clique em Editar e teste à vontade: nada aqui é enviado nem altera o seu preenchimento. Ao sair e voltar, o exemplo é restaurado.</p>
+      <a href="#"><button type="button">Voltar ao meu formulário</button></a>
+    </div>
     <div class="card aviso" id="cardAviso">
       <div class="bloco proposito">
         <h3>Para que serve esta página</h3>
         <p>Ela reúne, num só lugar, as informações que o PPGEAL precisa todo ano para preencher a Plataforma Sucupira da CAPES: missões, solidariedade, eventos, palestras, patentes, extensão, comitês, projetos, convênios, disciplinas, egressos e produtos em destaque.</p>
         <p>Substitui as planilhas separadas que eram enviadas para cada atividade. Você preenche uma vez por ano-base, pode salvar e voltar depois, e envia tudo de uma vez para a secretaria.</p>
         <p><a href="#leia-me">Leia-me: como preencher, onde seus dados ficam salvos e como fazer cópia de segurança →</a></p>
+        <p><a href="#exemplo">Ver um exemplo preenchido (docente fictício) →</a></p>
       </div>
       <div class="bloco lattes">
         <h3>Atualize seu Currículo Lattes até <span id="dataLattes"></span></h3>
@@ -235,6 +241,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
         <li>Envie o arquivo <code>.json</code> baixado para <b class="emailSec"></b>.</li>
       </ol>
       <p>Uma atividade com vários docentes do PPGEAL (um evento, uma ação de extensão) pode ser cadastrada só pelo(a) coordenador(a).</p>
+      <p>Quer ver como fica? Abra o <a href="#exemplo">exemplo preenchido</a>, um docente fictício com uma atividade em cada categoria.</p>
 
       <h3>Onde seus dados ficam salvos</h3>
       <p>O que você digita fica salvo automaticamente <b>somente no navegador e no aparelho em que você preencheu</b>. Não há login: a página não guarda seu rascunho na internet.</p>
@@ -329,7 +336,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
   <div class="wrap row">
     <button class="sec" id="btnBaixarXlsxDoc">Baixar minhas respostas (Excel)</button>
     <button class="ghost" id="btnBackup">Salvar cópia (.json)</button>
-    <label class="ghost" style="margin:0;font-weight:600;color:var(--pri);cursor:pointer;padding:6px 8px">Abrir cópia…
+    <label id="lblRestaurar" class="ghost" style="margin:0;font-weight:600;color:var(--pri);cursor:pointer;padding:6px 8px">Abrir cópia…
       <input type="file" id="arquivoRestaurar" class="hidden"></label>
     <span class="spacer"></span>
     <span id="statusEnvio" class="sub" style="margin:0"></span>
@@ -528,6 +535,10 @@ const CATEGORIAS = [
   ]}
 ];
 
+/* EXEMPLO — docente fictício mostrado em #exemplo (uma atividade por categoria) */
+const EXEMPLO_NOME = 'Docente Exemplo (simulação)';
+const EXEMPLO = {"publicacoes": [{"titulo": "Filmes comestíveis de amido de mandioca com extrato de casca de uva", "tipo": "Artigo em periódico", "veiculo": "Food Hydrocolloids", "ano": 2026, "doi": "10.1016/j.foodhyd.2026.000001", "discentes": "Ana Teste da Silva", "instituicoes": "UFSC; Universidade do Porto", "paises": "Brasil; Portugal", "citacoes": 3, "fi": 10.7, "_id": "exemplo-publicacoes-1"}], "missoes": [{"local": "Universidade do Porto, Porto, Portugal", "tipoCoop": "Missão de trabalho (enviada)", "projeto": "CAPES-PrInt – Embalagens sustentáveis", "inicio": "2026-04-06", "fim": "2026-04-24", "externos": "Prof. João Exemplo (U. Porto)", "_id": "exemplo-missoes-1"}], "solidariedade": [{"instituicao": "Universidade Federal Fictícia do Norte – PPG em Ciência de Alimentos", "tipoAcordo": "PROCAD", "processo": "88881.000000/2026-01", "agencia": "CAPES", "inicio": "2026-03-01", "fim": "2030-02-28", "coordenador": "Docente Exemplo", "docentes": "Docente Exemplo; Prof. Fulano de Tal", "atividades": "Coorientação de 2 mestrandos e minicurso de 20 h sobre secagem de alimentos", "_id": "exemplo-solidariedade-1"}], "eventos": [{"nome": "I Workshop de Engenharia de Alimentos Sustentável", "natureza": "Científico", "docentes": "Docente Exemplo; Prof. Fulano de Tal", "inicio": "2026-09-15", "fim": "2026-09-16", "ano": 2026, "participantes": 180, "_id": "exemplo-eventos-1"}], "palestras": [{"titulo": "Tecnologias emergentes no processamento não térmico", "evento": "Congresso Brasileiro de Ciência e Tecnologia de Alimentos (fictício)", "abrangencia": "Nacional", "ano": 2026, "participantes": 250, "_id": "exemplo-palestras-1"}], "patentes": [{"titulo": "Processo de obtenção de corante natural a partir de resíduo de beterraba", "tipo": "Patente de invenção", "dataDeposito": "2026-02-10", "codInterno": "SINOVA-2026-001", "codRegistro": "BR 10 2026 000000-0", "pais": "Brasil", "depositante": "UFSC", "inventores": "Docente Exemplo; Ana Teste da Silva", "_id": "exemplo-patentes-1"}], "extensao": [{"titulo": "Ciência na Cozinha: alimentos e engenharia nas escolas", "local": "Escolas públicas de Florianópolis", "inicio": "2026-05-01", "fim": "2026-11-30", "publico": "Estudantes do ensino médio", "resumo": "Oficinas práticas sobre fermentação e conservação de alimentos em 4 escolas", "docentes": "Docente Exemplo", "discentes": "Ana Teste da Silva; Bruno Exemplo", "_id": "exemplo-extensao-1"}], "cursosExtensao": [{"curso": "EXT-2026-01 – Boas práticas de fabricação para pequenos produtores", "linha": "Desenvolvimento de Produtos e Processos", "ano": 2026, "carga": 16, "inicio": "2026-06-08", "fim": "2026-06-09", "_id": "exemplo-cursosExtensao-1"}], "comites": [{"categoria": "Editorias e publicações científicas", "inicio": "2026-01-01", "atuacao": "Editor associado do Journal of Fictional Food Engineering", "_id": "exemplo-comites-1"}], "projetos": [{"titulo": "Recuperação de compostos fenólicos por extração supercrítica", "processo": "400000/2026-0", "fomento": "CNPq", "recursos": 120000, "inicio": "2026-03-01", "fim": "2029-02-28", "linha": "Fenômenos de Transporte e Processos de Separação", "projetoPPG": "Processos de separação a alta pressão", "_id": "exemplo-projetos-1"}], "convenios": [{"titulo": "Desenvolvimento de bebida fermentada de baixo teor de açúcar", "conveniada": "Laticínios Exemplo Ltda.", "tipoConvenio": "Empresa", "processo": "23080.000000/2026-11", "inicio": "2026-07-01", "fim": "2027-06-30", "executor": "FEESC", "recursos": 85000, "_id": "exemplo-convenios-1"}], "destaques": [{"titulo": "Processo de obtenção de corante natural a partir de resíduo de beterraba", "tipo": "Patente", "ano": 2026, "link": "BR 10 2026 000000-0", "justificativa": "Primeiro pedido de patente da linha em parceria com cooperativa; aproveita resíduo hoje descartado", "_id": "exemplo-destaques-1"}], "disciplinas": [{"disciplina": "EAL 0000 – Tópicos Especiais em Engenharia de Alimentos (fictícia)", "ano": 2026, "linha": "Todas as linhas", "_id": "exemplo-disciplinas-1"}], "egressos": [{"nome": "Carlos Exemplo Souza", "nivel": "Doutorado", "cargo": "Pesquisador de P&D na Indústria de Alimentos Fictícia S.A.", "setor": "Indústria / empresa", "lattes": "0000-0000-0000-0000", "_id": "exemplo-egressos-1"}]};
+
 /* ===================================================================== */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -585,7 +596,7 @@ async function trocarAno(novo){
   store.set(chaveLocal(), estado); rotear();
 }
 function categoriasVisiveis(){ return CATEGORIAS.filter(c => modo==='secretaria' ? c.quem==='secretaria' : c.quem==='docente'); }
-function chaveLocal(){ return LS_KEY + (modo==='secretaria' ? '-sec' : ''); }
+function chaveLocal(){ return LS_KEY + (modo==='secretaria' ? '-sec' : modo==='exemplo' ? '-exemplo' : ''); }
 function salvar(){ estado.alteradoEm = new Date().toISOString(); store.set(chaveLocal(), estado); atualizarStatusEnvio(); }
 
 /* ---------- roteamento ---------- */
@@ -603,8 +614,8 @@ function rotear(){
     window.scrollTo(0,0); return;
   }
   $('#viewAjuda').classList.add('hidden');
-  modo = h==='admin' ? 'admin' : h==='secretaria' ? 'secretaria' : 'docente';
-  const pedeSenha = modo!=='docente' && CONFIG.senhaSecretariaHash && !liberado();
+  modo = h==='admin' ? 'admin' : h==='secretaria' ? 'secretaria' : h==='exemplo' ? 'exemplo' : 'docente';
+  const pedeSenha = (modo==='admin' || modo==='secretaria') && CONFIG.senhaSecretariaHash && !liberado();
   $('#viewSenha').classList.toggle('hidden', !pedeSenha);
   if(pedeSenha){
     ['#viewDocente','#viewAdmin','#barraEnvio'].forEach(x=>$(x).classList.add('hidden'));
@@ -614,17 +625,25 @@ function rotear(){
   $('#viewDocente').classList.toggle('hidden', modo==='admin');
   $('#viewAdmin').classList.toggle('hidden', modo!=='admin');
   $('#barraEnvio').classList.toggle('hidden', modo==='admin');
-  $('#modoLink').innerHTML = modo==='docente'
-    ? `<a href="#leia-me">Leia-me: como usar</a> · <a href="#admin" style="font-weight:400">Área da secretaria</a>`
+  $('#modoLink').innerHTML = modo==='exemplo' ? `<a href="#">Voltar ao meu formulário</a>`
+    : modo==='docente' ? `<a href="#leia-me">Leia-me: como usar</a> · <a href="#exemplo">Ver exemplo</a> · <a href="#admin" style="font-weight:400">Área da secretaria</a>`
     : `<a href="#">Voltar ao formulário do docente</a>${modo==='secretaria'?' · <a href="#admin">Painel</a>':''}`;
   if(modo==='admin'){ iniciarAdmin(); return; }
-  estado = montarEstado(store.get(chaveLocal()) || estadoVazio());
+  estado = montarEstado(modo==='exemplo'
+    ? {versao:2, docente:{nome:EXEMPLO_NOME, email:'exemplo@exemplo.com'}, ano:2026,
+       porAno:{2026:{itens:JSON.parse(JSON.stringify(EXEMPLO)), nada:{}, enviadoEm:null, alteradoEm:null}}}
+    : (store.get(chaveLocal()) || estadoVazio()));
+  const ex = modo==='exemplo';
+  $('#cardExemplo').classList.toggle('hidden', !ex);
+  ['#dNome','#dEmail','#dAno'].forEach(x=>$(x).disabled = ex);
+  ['#btnEnviar','#btnBackup','#lblRestaurar','#statusEnvio'].forEach(x=>$(x).classList.toggle('hidden', ex));
+  $('#btnBaixarXlsxDoc').textContent = ex ? 'Ver o exemplo em Excel' : 'Baixar minhas respostas (Excel)';
   estado.itens ||= {}; estado.nada ||= {};
   if(modo==='secretaria' && !estado.docente.nome){ estado.docente.nome='Secretaria PPGEAL'; }
   $('#introTxt').textContent = modo==='secretaria'
     ? 'Lançamentos feitos pela secretaria. Ao terminar, baixe o arquivo .json (ou envie, se houver servidor) para entrar no consolidado.'
     : 'Preencha uma vez. Suas respostas ficam salvas neste navegador até você enviar e podem ser editadas e reenviadas depois.';
-  $('#cardAviso').classList.toggle('hidden', modo==='secretaria');
+  $('#cardAviso').classList.toggle('hidden', modo!=='docente');
   $('#dNome').value = estado.docente.nome; $('#dEmail').value = estado.docente.email; $('#dAno').value = estado.ano;
   catAberta = null; editando = null;
   renderCats(); $('#painelCat').classList.add('hidden'); atualizarStatusEnvio();
@@ -636,7 +655,7 @@ function initIdent(){
   document.querySelectorAll('.emailSec').forEach(e=>e.textContent = CONFIG.emailSecretaria);
   $('#dataLattes').textContent = CONFIG.prazoLattes || 'o prazo informado pela secretaria';
   $('#listaDocentes').innerHTML = CONFIG.docentes.map(n=>`<option value="${esc(n)}">`).join('');
-  $('#dNome').innerHTML = '<option value="">Selecione seu nome…</option>' + CONFIG.docentes.map(n=>`<option>${esc(n)}</option>`).join('') + (CONFIG.modoTeste ? '<option>Docente Teste (simulação)</option>' : '') + '<option value="Secretaria PPGEAL" hidden>Secretaria PPGEAL</option>';
+  $('#dNome').innerHTML = '<option value="">Selecione seu nome…</option>' + CONFIG.docentes.map(n=>`<option>${esc(n)}</option>`).join('') + (CONFIG.modoTeste ? '<option>Docente Teste (simulação)</option>' : '') + '<option value="Secretaria PPGEAL" hidden>Secretaria PPGEAL</option>' + `<option hidden>${EXEMPLO_NOME}</option>`;
 
   const anos = CONFIG.anos.map(a=>`<option value="${a}">${a}</option>`).join('');
   $('#dAno').innerHTML = anos;
