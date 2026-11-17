@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
 /* =====================================================================
    CONFIGURAÇÃO — edite apenas este bloco
@@ -146,10 +147,19 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .aviso .lattes{background:var(--warn-2);border-left:4px solid var(--broto)}
 .aviso h3{margin:0 0 6px;font-size:1rem}
 .aviso .proposito h3{color:var(--pri)} .aviso .lattes h3{color:var(--warn)}
+.aviso ul.fontes{margin:0 0 8px;padding-left:18px;font-size:.92rem} .aviso ul.fontes li{margin:2px 0}
 .aviso a{color:var(--pri);font-weight:600}
 .aviso p{margin:0 0 6px;font-size:.92rem} .aviso p:last-child{margin-bottom:0}
 .ajuda a{color:var(--pri);font-weight:600} .ajuda h3{margin:22px 0 6px;color:var(--pri)} .ajuda p,.ajuda li{font-size:.95rem} .ajuda ol{padding-left:22px}
 .ajuda table{margin:8px 0 10px} .ajuda td,.ajuda th{font-size:.9rem}
+.seg{display:inline-flex;border:1px solid var(--pri);border-radius:8px;overflow:hidden}
+.seg label{margin:0;cursor:pointer;font-weight:600}
+.seg input{position:absolute;opacity:0;width:1px;height:1px}
+.seg span{display:block;padding:8px 22px;color:var(--pri);background:#fff;font-size:.95rem}
+.seg label+label span{border-left:1px solid var(--pri)}
+.seg input:checked+span{background:var(--pri);color:#fff}
+.seg input:focus-visible+span{outline:2px solid var(--broto);outline-offset:-2px}
+.seg.invalid{border-color:var(--err)}
 .hint{background:var(--warn-2);border-left:4px solid var(--broto);color:var(--warn);padding:10px 14px;border-radius:8px;font-size:.9rem;margin-bottom:12px}
 .stick{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 24px;z-index:5}
 table{border-collapse:collapse;width:100%;font-size:.88rem}
@@ -190,15 +200,22 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
     <div class="card aviso" id="cardAviso">
       <div class="bloco proposito">
         <h3>Para que serve esta página</h3>
-        <p>Ela reúne, num só lugar, as informações que o PPGEAL precisa todo ano para preencher a Plataforma Sucupira da CAPES: missões, solidariedade, eventos, palestras, patentes, extensão, comitês, projetos, convênios, disciplinas, egressos e produtos em destaque.</p>
+        <p>Ela reúne, num só lugar, as informações que o PPGEAL precisa todo ano para preencher a Plataforma Sucupira da CAPES: missões, solidariedade, eventos, palestras, extensão, comitês, convênios, disciplinas ministradas fora do PPGEAL, egressos e produtos em destaque.</p>
         <p>Substitui as planilhas separadas que eram enviadas para cada atividade. Você preenche uma vez por ano-base, pode salvar e voltar depois, e envia tudo de uma vez para a secretaria.</p>
         <p><a href="#leia-me">Leia-me: como preencher, onde seus dados ficam salvos e como fazer cópia de segurança →</a></p>
         <p><a href="#exemplo">Ver um exemplo preenchido (docente fictício) →</a></p>
       </div>
       <div class="bloco lattes">
         <h3>Atualize seu Currículo Lattes até <span id="dataLattes"></span></h3>
-        <p>Artigos, trabalhos em eventos, livros, capítulos, orientações e bancas são importados <b>diretamente do Lattes</b> para o Sucupira. Por isso eles não precisam ser cadastrados aqui.</p>
-        <p>Nesta página, registre apenas o que o Lattes não informa (por exemplo, coautoria com discentes/egressos e com instituições estrangeiras). <a href="https://lattes.cnpq.br/" target="_blank" rel="noopener">Acessar a Plataforma Lattes</a></p>
+        <p>A secretaria coleta direto da fonte, por isso <b>não cadastre aqui</b>:</p>
+        <ul class="fontes">
+          <li><b>Publicações</b>: Web of Science e Lattes</li>
+          <li><b>Patentes</b>: Lattes</li>
+          <li><b>Projetos de pesquisa</b>: SIGPEX/UFSC</li>
+          <li><b>Disciplinas do PPGEAL</b>: secretaria</li>
+          <li><b>Orientações e bancas</b>: Lattes</li>
+        </ul>
+        <p>Como parte disso vem do seu Lattes, mantenha-o atualizado. <a href="https://lattes.cnpq.br/" target="_blank" rel="noopener">Acessar a Plataforma Lattes</a></p>
       </div>
     </div>
     <div class="card">
@@ -234,7 +251,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
 
       <h3>Como preencher</h3>
       <ol>
-        <li>Atualize seu Currículo Lattes até a data indicada no topo da página. Artigos, trabalhos em eventos, livros, orientações e bancas vêm do Lattes e não precisam ser cadastrados aqui.</li>
+        <li>Atualize seu Currículo Lattes até a data indicada no topo da página. Publicações (Web of Science e Lattes), patentes (Lattes), projetos de pesquisa (SIGPEX), orientações, bancas e disciplinas do PPGEAL são coletados pela secretaria e não são cadastrados aqui.</li>
         <li>Escolha seu nome, informe seu e-mail e o ano-base.</li>
         <li>Clique em cada categoria e cadastre suas atividades. Se não teve nenhuma, marque “Não tive atividades nesta categoria”.</li>
         <li>Quando todas as categorias mostrarem selo verde (itens) ou cinza (sem atividades), clique em <b>Gerar arquivo para a secretaria</b>.</li>
@@ -265,9 +282,9 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <p>Trocar o ano-base não apaga nada: você pode voltar ao ano anterior e tudo estará como deixou. Um ano novo começa vazio, mas se o ano anterior tiver itens ainda vigentes, a página pergunta se você quer trazê-los.</p>
       <table>
         <tr><th>Categoria</th><th>No ano novo</th></tr>
-        <tr><td>Projetos de pesquisa, Convênios, Solidariedade institucional, Ações de extensão</td><td>Oferece trazer os itens sem data de fim ou com fim no ano novo ou depois</td></tr>
+        <tr><td>Convênios, Solidariedade institucional, Ações de extensão</td><td>Oferece trazer os itens sem data de fim ou com fim no ano novo ou depois</td></tr>
         <tr><td>Comitês e representações</td><td>Oferece trazer todos</td></tr>
-        <tr><td>Publicações, Missões, Eventos, Palestras, Patentes, Cursos de extensão, Produtos em destaque, Disciplinas, Egressos</td><td>Começam vazias</td></tr>
+        <tr><td>Missões, Eventos, Palestras, Cursos de extensão, Produtos em destaque, Disciplinas fora do PPGEAL, Egressos</td><td>Começam vazias</td></tr>
       </table>
       <p>Isso só funciona no mesmo navegador do ano anterior. Em outro aparelho, abra antes a cópia <code>.json</code> do ano anterior e depois troque o ano-base.</p>
 
@@ -281,6 +298,42 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <h3>Contato</h3>
       <p>Secretaria do PPGEAL – <b class="emailSec"></b> – (48) 3721-4063</p>
       <p><a href="#">← Voltar ao formulário</a></p>
+    </div>
+  </section>
+
+  <!-- ================= GUIA DA SECRETARIA ================= -->
+  <section id="viewGuiaSec" class="hidden">
+    <div class="card ajuda">
+      <p><a href="#admin">← Voltar ao painel da secretaria</a></p>
+      <h2>Como baixar os currículos Lattes e a exportação do Web of Science</h2>
+
+      <h3>1. Currículos Lattes (publicações e patentes)</h3>
+      <ol>
+        <li>Abra o currículo do docente: <code>lattes.cnpq.br/</code> seguido do ID Lattes, ou pela <a href="https://buscatextual.cnpq.br/buscatextual/busca.do" target="_blank" rel="noopener">busca textual</a>.</li>
+        <li>No canto superior direito do currículo, clique no botão <b>XML</b>.</li>
+        <li>Resolva o código de verificação (captcha). O navegador baixa um arquivo <code>.zip</code> com o número do ID Lattes no nome.</li>
+        <li>Repita para cada docente. Não precisa descompactar: a página lê o <code>.zip</code> direto.</li>
+        <li>No painel, em <b>Currículos Lattes</b>, selecione todos os arquivos de uma vez.</li>
+      </ol>
+      <p>A tabela mostra a data da última atualização de cada currículo. Com o prazo definido em <code>prazoLattes</code>, o Excel indica quem atualizou dentro do prazo. Baixe os currículos <b>depois</b> desse prazo.</p>
+
+      <h3>2. Web of Science (publicações)</h3>
+      <ol>
+        <li>Acesse o <a href="https://www.periodicos.capes.gov.br/" target="_blank" rel="noopener">Portal de Periódicos da CAPES</a> com o acesso CAFe da UFSC e abra o Web of Science (Core Collection).</li>
+        <li>Monte a busca dos docentes do PPGEAL. Uma forma prática é a <b>Advanced Search</b>, juntando os autores e o endereço, por exemplo:<br>
+          <code>AU=("Lanza M*" OR "Di Luccio M*" OR "Poletto P*") AND AD=(Santa Catarina)</code><br>
+          Se os docentes tiverem ResearcherID ou ORCID, a busca por esses identificadores é mais precisa.</li>
+        <li>Filtre pelo ano de publicação (Publication Years) desejado.</li>
+        <li>Clique em <b>Export</b> e escolha <b>Excel</b> (ou <b>Tab delimited file</b>).</li>
+        <li>Em <b>Record Content</b>, escolha <b>Full Record</b>. Exporte até 1.000 registros por vez (1–1000, 1001–2000…).</li>
+        <li>No painel, em <b>Web of Science</b>, selecione o arquivo baixado (<code>savedrecs.xls</code> ou <code>savedrecs.txt</code>).</li>
+      </ol>
+      <p>A página identifica os docentes do PPGEAL pelo nome dos autores e marca se o artigo tem endereço UFSC. Confira essas duas colunas: autores com sobrenome comum podem gerar falso positivo.</p>
+
+      <h3>3. Gerar o Excel</h3>
+      <p>Escolha o ano-base no painel e clique em <b>Exportar Excel consolidado</b>. Além das abas dos docentes, aparecem: <b>Lattes – atualização</b>, <b>Publicações (Lattes)</b>, <b>Patentes (Lattes)</b> e <b>Publicações (WoS)</b>. Publicações repetidas entre docentes coautores aparecem uma vez só, com todos os nomes. A coluna “Também no WoS?” cruza o Lattes com o WoS pelo DOI.</p>
+      <p>Os arquivos importados ficam guardados só neste navegador. Para recomeçar, use <b>Limpar fontes externas</b>.</p>
+      <p><a href="#admin">← Voltar ao painel da secretaria</a></p>
     </div>
   </section>
 
@@ -325,6 +378,26 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <div class="tblwrap" id="tabelaStatus"></div>
       <p class="sub" style="margin-top:8px">✔ n = itens cadastrados · “—” = declarou não ter atividades · em branco = não respondeu.</p>
     </div>
+    <div class="card" id="cardFontes">
+      <h2>Fontes externas: Lattes e Web of Science</h2>
+      <p class="sub">Importe aqui os currículos Lattes (para publicações e patentes) e a exportação do Web of Science. Eles entram como abas extras no Excel consolidado, filtrados pelo ano-base escolhido acima. <a href="#leia-me-secretaria">Como baixar esses arquivos →</a></p>
+      <div class="grid">
+        <div class="f-half">
+          <label>Currículos Lattes <span class="help">Arquivos .zip ou .xml baixados no botão XML de cada currículo. Pode selecionar vários.</span></label>
+          <input id="arquivosLattes" type="file" multiple>
+        </div>
+        <div class="f-half">
+          <label>Web of Science <span class="help">Exportação em Excel (.xls) ou texto delimitado por tabulação (.txt), com “Full Record”.</span></label>
+          <input id="arquivosWos" type="file" multiple>
+        </div>
+      </div>
+      <div id="msgFontes"></div>
+      <h3 style="margin:16px 0 6px">Currículos Lattes</h3>
+      <div id="resumoLattes"></div>
+      <h3 style="margin:16px 0 6px">Web of Science</h3>
+      <div id="resumoWos"></div>
+      <div class="row" style="margin-top:10px"><span class="spacer"></span><button class="danger" id="btnLimparFontes">Limpar fontes externas</button></div>
+    </div>
     <div class="card">
       <h2>Lançamentos da secretaria</h2>
       <p class="sub">Categorias que a própria secretaria preenche (por exemplo, perfil de formação dos ingressantes) ficam na <a href="#secretaria">visão de lançamento da secretaria</a>. Elas usam o mesmo formulário e entram no consolidado ao importar o arquivo gerado.</p>
@@ -358,21 +431,6 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
    ===================================================================== */
 const ABRANGENCIA = ['Local','Regional','Nacional','Internacional','Online – Nacional','Online – Internacional'];
 const CATEGORIAS = [
- {id:'publicacoes', titulo:'Publicações', quem:'docente',
-  desc:'Produção com discente/egresso do PPGEAL ou com instituição estrangeira. A produção completa vem do Lattes; aqui interessam os vínculos que o Lattes não mostra.',
-  resumo:['titulo','veiculo','ano'],
-  campos:[
-   {id:'titulo',label:'Título da produção',tipo:'text',obrig:1,larg:'full'},
-   {id:'tipo',label:'Tipo de publicação',tipo:'select',opcoes:['Artigo em periódico','Trabalho completo em anais','Capítulo de livro','Livro','Outro'],obrig:1,larg:'third'},
-   {id:'veiculo',label:'Periódico / veículo',tipo:'text',obrig:1,larg:'third'},
-   {id:'ano',label:'Ano',tipo:'year',obrig:1,larg:'third'},
-   {id:'doi',label:'DOI',tipo:'text',larg:'half',ajuda:'ex.: 10.1016/j.molliq.2025.129151'},
-   {id:'discentes',label:'Autor(es) discente/egresso do PPGEAL',tipo:'text',larg:'half'},
-   {id:'instituicoes',label:'Instituições envolvidas',tipo:'text',larg:'half'},
-   {id:'paises',label:'Países envolvidos',tipo:'text',larg:'half'},
-   {id:'citacoes',label:'Número de citações',tipo:'number',larg:'third'},
-   {id:'fi',label:'Fator de impacto',tipo:'number',larg:'third',passo:'0.001'}
-  ]},
  {id:'missoes', titulo:'Missões e cooperação', quem:'docente',
   desc:'Missões institucionais e de cooperação científica com instituição estrangeira (enviadas ou recebidas).',
   resumo:['local','tipoCoop','inicio'],
@@ -386,8 +444,9 @@ const CATEGORIAS = [
   ]},
  {id:'solidariedade', titulo:'Solidariedade institucional', quem:'docente',
   desc:'Ações de solidariedade do PPGEAL com outras instituições (PROCAD, DINTER/MINTER, acordos de cooperação etc.).',
-  resumo:['instituicao','tipoAcordo','inicio'],
+  resumo:['instituicao','abrangencia','tipoAcordo'],
   campos:[
+   {id:'abrangencia',label:'Abrangência',tipo:'radio',opcoes:['Nacional','Internacional'],obrig:1,larg:'full'},
    {id:'instituicao',label:'Universidade / PPG vinculado',tipo:'text',obrig:1,larg:'half'},
    {id:'tipoAcordo',label:'Tipo de acordo institucional',tipo:'select',opcoes:['PROCAD','DINTER','MINTER','Acordo de cooperação','Nucleação / apoio a programa emergente','Outro'],obrig:1,larg:'half'},
    {id:'processo',label:'Número do processo',tipo:'text',larg:'third'},
@@ -419,23 +478,6 @@ const CATEGORIAS = [
    {id:'abrangencia',label:'Abrangência',tipo:'select',opcoes:ABRANGENCIA,obrig:1,larg:'half'},
    {id:'ano',label:'Ano',tipo:'year',obrig:1,larg:'third'},
    {id:'participantes',label:'Número de participantes',tipo:'number',larg:'third'}
-  ]},
- {id:'patentes', titulo:'Patentes e registros', quem:'docente',
-  desc:'Patentes e outros registros depositados ou concedidos.',
-  resumo:['titulo','tipo','dataDeposito'],
-  campos:[
-   {id:'titulo',label:'Título',tipo:'text',obrig:1,larg:'full'},
-   {id:'tipo',label:'Tipo da proteção',tipo:'select',opcoes:['Patente de invenção','Modelo de utilidade','Programa de computador','Cultivar','Desenho industrial','Marca','Outro'],obrig:1,larg:'third'},
-   {id:'dataDeposito',label:'Data de depósito',tipo:'date',larg:'third'},
-   {id:'dataConcessao',label:'Data da concessão',tipo:'date',larg:'third'},
-   {id:'codInterno',label:'Código interno',tipo:'text',larg:'third'},
-   {id:'codRegistro',label:'Código de registro',tipo:'text',larg:'third'},
-   {id:'pais',label:'País',tipo:'text',larg:'third'},
-   {id:'depositante',label:'Instituição depositante',tipo:'text',larg:'half'},
-   {id:'cotitulares',label:'Cotitulares',tipo:'text',larg:'half'},
-   {id:'inventores',label:'Inventores / autores / melhoristas',tipo:'text',larg:'full'},
-   {id:'transferencia',label:'Transferência de tecnologia/conhecimento',tipo:'text',larg:'half',ajuda:'Descreva, ou deixe em branco se não houve'},
-   {id:'processoFomento',label:'Processo da agência de fomento',tipo:'text',larg:'half'}
   ]},
  {id:'extensao', titulo:'Ações de extensão', quem:'docente',
   desc:'Extensão, popularização da ciência e outras interações com a sociedade que você coordena.',
@@ -469,20 +511,6 @@ const CATEGORIAS = [
    {id:'inicio',label:'Início',tipo:'date',larg:'third'},
    {id:'atuacao',label:'Atuação',tipo:'textarea',obrig:1,larg:'full',ajuda:'ex.: Editor associado do periódico X; membro do comitê de assessoramento CA-XX do CNPq'}
   ]},
- {id:'projetos', titulo:'Projetos de pesquisa', quem:'docente',
-  desc:'Projetos de pesquisa e financiamentos em que você é responsável.',
-  resumo:['titulo','fomento','inicio'],
-  campos:[
-   {id:'titulo',label:'Título',tipo:'text',obrig:1,larg:'full'},
-   {id:'processo',label:'Processo',tipo:'text',larg:'third'},
-   {id:'fomento',label:'Órgão de fomento',tipo:'text',obrig:1,larg:'third'},
-   {id:'recursos',label:'Recursos aprovados (R$)',tipo:'number',larg:'third',passo:'0.01'},
-   {id:'inicio',label:'Início da vigência',tipo:'date',larg:'third'},
-   {id:'fim',label:'Fim da vigência',tipo:'date',larg:'third'},
-   {id:'linha',label:'Linha de pesquisa',tipo:'linha',obrig:1,larg:'half'},
-   {id:'projetoPPG',label:'Projeto de pesquisa do programa',tipo:'projetoPPG',obrig:1,larg:'half',ajuda:'Projeto da linha ao qual este trabalho se vincula'},
-   {id:'outras',label:'Outras informações',tipo:'textarea',larg:'full'}
-  ]},
  {id:'convenios', titulo:'Convênios e acordos', quem:'docente',
   desc:'Convênios com ou sem financiamento com empresas, universidades e institutos (nacionais e internacionais).',
   resumo:['titulo','conveniada','inicio'],
@@ -506,13 +534,16 @@ const CATEGORIAS = [
    {id:'link',label:'Link / DOI',tipo:'text',larg:'third'},
    {id:'justificativa',label:'Por que é destaque (impacto)',tipo:'textarea',obrig:1,larg:'full'}
   ]},
- {id:'disciplinas', titulo:'Disciplinas ministradas', quem:'docente',
-  desc:'Disciplinas do PPGEAL ministradas no ano-base.',
-  resumo:['disciplina','ano'],
+ {id:'disciplinas', titulo:'Disciplinas ministradas fora do PPGEAL', aba:'Disciplinas fora do PPGEAL', quem:'docente',
+  desc:'Somente disciplinas que você ministrou FORA do PPGEAL no ano-base: na graduação, em outros programas de pós-graduação da UFSC ou em outras instituições.',
+  resumo:['disciplina','curso','nivel'],
   campos:[
-   {id:'disciplina',label:'Código e nome da disciplina',tipo:'text',obrig:1,larg:'full',ajuda:'ex.: EAL 3002 – Termodinâmica'},
+   {id:'disciplina',label:'Código e nome da disciplina',tipo:'text',obrig:1,larg:'full',ajuda:'ex.: EQA 5313 – Operações Unitárias de Transferência de Quantidade de Movimento'},
+   {id:'curso',label:'Curso ou programa em que foi ministrada',tipo:'text',obrig:1,larg:'half',ajuda:'ex.: Graduação em Engenharia de Alimentos'},
+   {id:'nivel',label:'Nível',tipo:'select',opcoes:['Graduação','Especialização','Mestrado','Doutorado','Outro'],obrig:1,larg:'third'},
+   {id:'instituicao',label:'Instituição',tipo:'text',larg:'half',ajuda:'Deixe em branco se for na UFSC'},
    {id:'ano',label:'Ano',tipo:'year',obrig:1,larg:'third'},
-   {id:'linha',label:'Linha de pesquisa',tipo:'linha',todas:1,larg:'half'}
+   {id:'carga',label:'Carga horária (h)',tipo:'number',larg:'third'}
   ]},
  {id:'egressos', titulo:'Egressos', quem:'docente',
   desc:'Onde estão atuando seus ex-orientandos do PPGEAL.',
@@ -524,7 +555,7 @@ const CATEGORIAS = [
    {id:'setor',label:'Setor de atuação',tipo:'select',opcoes:['Academia / ensino superior','Pesquisa (instituto)','Indústria / empresa','Governo / órgão público','Organismo internacional','Empreendedor(a) / startup','Terceiro setor','Outro'],larg:'half'},
    {id:'lattes',label:'Lattes / ORCID',tipo:'text',larg:'half'}
   ]},
- {id:'formacaoIngressantes', titulo:'Perfil de formação dos ingressantes', quem:'secretaria',
+ {id:'formacaoIngressantes', titulo:'Perfil de formação dos ingressantes', aba:'Perfil dos ingressantes', quem:'secretaria',
   desc:'Formação na graduação (e no mestrado, para o doutorado) dos discentes matriculados.',
   resumo:['nome','nivel','graduacao'],
   campos:[
@@ -537,7 +568,7 @@ const CATEGORIAS = [
 
 /* EXEMPLO — docente fictício mostrado em #exemplo (uma atividade por categoria) */
 const EXEMPLO_NOME = 'Docente Exemplo (simulação)';
-const EXEMPLO = {"publicacoes": [{"titulo": "Filmes comestíveis de amido de mandioca com extrato de casca de uva", "tipo": "Artigo em periódico", "veiculo": "Food Hydrocolloids", "ano": 2026, "doi": "10.1016/j.foodhyd.2026.000001", "discentes": "Ana Teste da Silva", "instituicoes": "UFSC; Universidade do Porto", "paises": "Brasil; Portugal", "citacoes": 3, "fi": 10.7, "_id": "exemplo-publicacoes-1"}], "missoes": [{"local": "Universidade do Porto, Porto, Portugal", "tipoCoop": "Missão de trabalho (enviada)", "projeto": "CAPES-PrInt – Embalagens sustentáveis", "inicio": "2026-04-06", "fim": "2026-04-24", "externos": "Prof. João Exemplo (U. Porto)", "_id": "exemplo-missoes-1"}], "solidariedade": [{"instituicao": "Universidade Federal Fictícia do Norte – PPG em Ciência de Alimentos", "tipoAcordo": "PROCAD", "processo": "88881.000000/2026-01", "agencia": "CAPES", "inicio": "2026-03-01", "fim": "2030-02-28", "coordenador": "Docente Exemplo", "docentes": "Docente Exemplo; Prof. Fulano de Tal", "atividades": "Coorientação de 2 mestrandos e minicurso de 20 h sobre secagem de alimentos", "_id": "exemplo-solidariedade-1"}], "eventos": [{"nome": "I Workshop de Engenharia de Alimentos Sustentável", "natureza": "Científico", "docentes": "Docente Exemplo; Prof. Fulano de Tal", "inicio": "2026-09-15", "fim": "2026-09-16", "ano": 2026, "participantes": 180, "_id": "exemplo-eventos-1"}], "palestras": [{"titulo": "Tecnologias emergentes no processamento não térmico", "evento": "Congresso Brasileiro de Ciência e Tecnologia de Alimentos (fictício)", "abrangencia": "Nacional", "ano": 2026, "participantes": 250, "_id": "exemplo-palestras-1"}], "patentes": [{"titulo": "Processo de obtenção de corante natural a partir de resíduo de beterraba", "tipo": "Patente de invenção", "dataDeposito": "2026-02-10", "codInterno": "SINOVA-2026-001", "codRegistro": "BR 10 2026 000000-0", "pais": "Brasil", "depositante": "UFSC", "inventores": "Docente Exemplo; Ana Teste da Silva", "_id": "exemplo-patentes-1"}], "extensao": [{"titulo": "Ciência na Cozinha: alimentos e engenharia nas escolas", "local": "Escolas públicas de Florianópolis", "inicio": "2026-05-01", "fim": "2026-11-30", "publico": "Estudantes do ensino médio", "resumo": "Oficinas práticas sobre fermentação e conservação de alimentos em 4 escolas", "docentes": "Docente Exemplo", "discentes": "Ana Teste da Silva; Bruno Exemplo", "_id": "exemplo-extensao-1"}], "cursosExtensao": [{"curso": "EXT-2026-01 – Boas práticas de fabricação para pequenos produtores", "linha": "Desenvolvimento de Produtos e Processos", "ano": 2026, "carga": 16, "inicio": "2026-06-08", "fim": "2026-06-09", "_id": "exemplo-cursosExtensao-1"}], "comites": [{"categoria": "Editorias e publicações científicas", "inicio": "2026-01-01", "atuacao": "Editor associado do Journal of Fictional Food Engineering", "_id": "exemplo-comites-1"}], "projetos": [{"titulo": "Recuperação de compostos fenólicos por extração supercrítica", "processo": "400000/2026-0", "fomento": "CNPq", "recursos": 120000, "inicio": "2026-03-01", "fim": "2029-02-28", "linha": "Fenômenos de Transporte e Processos de Separação", "projetoPPG": "Processos de separação a alta pressão", "_id": "exemplo-projetos-1"}], "convenios": [{"titulo": "Desenvolvimento de bebida fermentada de baixo teor de açúcar", "conveniada": "Laticínios Exemplo Ltda.", "tipoConvenio": "Empresa", "processo": "23080.000000/2026-11", "inicio": "2026-07-01", "fim": "2027-06-30", "executor": "FEESC", "recursos": 85000, "_id": "exemplo-convenios-1"}], "destaques": [{"titulo": "Processo de obtenção de corante natural a partir de resíduo de beterraba", "tipo": "Patente", "ano": 2026, "link": "BR 10 2026 000000-0", "justificativa": "Primeiro pedido de patente da linha em parceria com cooperativa; aproveita resíduo hoje descartado", "_id": "exemplo-destaques-1"}], "disciplinas": [{"disciplina": "EAL 0000 – Tópicos Especiais em Engenharia de Alimentos (fictícia)", "ano": 2026, "linha": "Todas as linhas", "_id": "exemplo-disciplinas-1"}], "egressos": [{"nome": "Carlos Exemplo Souza", "nivel": "Doutorado", "cargo": "Pesquisador de P&D na Indústria de Alimentos Fictícia S.A.", "setor": "Indústria / empresa", "lattes": "0000-0000-0000-0000", "_id": "exemplo-egressos-1"}]};
+const EXEMPLO = {"missoes": [{"local": "Universidade do Porto, Porto, Portugal", "tipoCoop": "Missão de trabalho (enviada)", "projeto": "CAPES-PrInt – Embalagens sustentáveis", "inicio": "2026-04-06", "fim": "2026-04-24", "externos": "Prof. João Exemplo (U. Porto)", "_id": "exemplo-missoes-1"}], "solidariedade": [{"abrangencia": "Nacional", "instituicao": "Universidade Federal Fictícia do Norte – PPG em Ciência de Alimentos", "tipoAcordo": "PROCAD", "processo": "88881.000000/2026-01", "agencia": "CAPES", "inicio": "2026-03-01", "fim": "2030-02-28", "coordenador": "Docente Exemplo", "docentes": "Docente Exemplo; Prof. Fulano de Tal", "atividades": "Coorientação de 2 mestrandos e minicurso de 20 h sobre secagem de alimentos", "_id": "exemplo-solidariedade-1"}], "eventos": [{"nome": "I Workshop de Engenharia de Alimentos Sustentável", "natureza": "Científico", "docentes": "Docente Exemplo; Prof. Fulano de Tal", "inicio": "2026-09-15", "fim": "2026-09-16", "ano": 2026, "participantes": 180, "_id": "exemplo-eventos-1"}], "palestras": [{"titulo": "Tecnologias emergentes no processamento não térmico", "evento": "Congresso Brasileiro de Ciência e Tecnologia de Alimentos (fictício)", "abrangencia": "Nacional", "ano": 2026, "participantes": 250, "_id": "exemplo-palestras-1"}], "extensao": [{"titulo": "Ciência na Cozinha: alimentos e engenharia nas escolas", "local": "Escolas públicas de Florianópolis", "inicio": "2026-05-01", "fim": "2026-11-30", "publico": "Estudantes do ensino médio", "resumo": "Oficinas práticas sobre fermentação e conservação de alimentos em 4 escolas", "docentes": "Docente Exemplo", "discentes": "Ana Teste da Silva; Bruno Exemplo", "_id": "exemplo-extensao-1"}], "cursosExtensao": [{"curso": "EXT-2026-01 – Boas práticas de fabricação para pequenos produtores", "linha": "Desenvolvimento de Produtos e Processos", "ano": 2026, "carga": 16, "inicio": "2026-06-08", "fim": "2026-06-09", "_id": "exemplo-cursosExtensao-1"}], "comites": [{"categoria": "Editorias e publicações científicas", "inicio": "2026-01-01", "atuacao": "Editor associado do Journal of Fictional Food Engineering", "_id": "exemplo-comites-1"}], "convenios": [{"titulo": "Desenvolvimento de bebida fermentada de baixo teor de açúcar", "conveniada": "Laticínios Exemplo Ltda.", "tipoConvenio": "Empresa", "processo": "23080.000000/2026-11", "inicio": "2026-07-01", "fim": "2027-06-30", "executor": "FEESC", "recursos": 85000, "_id": "exemplo-convenios-1"}], "destaques": [{"titulo": "Processo de obtenção de corante natural a partir de resíduo de beterraba", "tipo": "Patente", "ano": 2026, "link": "BR 10 2026 000000-0", "justificativa": "Primeiro pedido de patente da linha em parceria com cooperativa; aproveita resíduo hoje descartado", "_id": "exemplo-destaques-1"}], "disciplinas": [{"disciplina": "EQA 0000 – Fenômenos de Transporte (fictícia)", "curso": "Graduação em Engenharia de Alimentos", "nivel": "Graduação", "ano": 2026, "carga": 72, "_id": "exemplo-disciplinas-1"}], "egressos": [{"nome": "Carlos Exemplo Souza", "nivel": "Doutorado", "cargo": "Pesquisador de P&D na Indústria de Alimentos Fictícia S.A.", "setor": "Indústria / empresa", "lattes": "0000-0000-0000-0000", "_id": "exemplo-egressos-1"}]};
 
 /* ===================================================================== */
 const $ = s => document.querySelector(s);
@@ -572,7 +603,7 @@ function montarEstado(raw){
   return raw;
 }
 /* Categorias cujos itens podem continuar valendo no ano seguinte */
-const CONTINUAM = ['projetos','convenios','solidariedade','comites','extensao'];
+const CONTINUAM = ['convenios','solidariedade','comites','extensao'];
 function anoVazio(a){ const d = estado.porAno[a]; return !d || (!Object.values(d.itens||{}).some(l=>l.length) && !Object.values(d.nada||{}).some(Boolean)); }
 async function trocarAno(novo){
   estado.ano = novo;
@@ -607,6 +638,13 @@ async function sha256(t){
 function liberado(){ try{ return sessionStorage.getItem('ppgeal-sec')===CONFIG.senhaSecretariaHash; }catch(e){ return window._sec===true; } }
 function rotear(){
   const h = location.hash.replace('#','');
+  $('#viewGuiaSec').classList.add('hidden');
+  if(h==='leia-me-secretaria'){
+    ['#viewDocente','#viewAdmin','#barraEnvio','#viewSenha','#viewAjuda'].forEach(x=>$(x).classList.add('hidden'));
+    $('#viewGuiaSec').classList.remove('hidden');
+    $('#modoLink').innerHTML = `<a href="#admin">Voltar ao painel</a>`;
+    window.scrollTo(0,0); return;
+  }
   if(h==='leia-me'){
     ['#viewDocente','#viewAdmin','#barraEnvio','#viewSenha'].forEach(x=>$(x).classList.add('hidden'));
     $('#viewAjuda').classList.remove('hidden');
@@ -700,7 +738,7 @@ function renderPainel(){
     <div class="row"><h2>${esc(c.titulo)}</h2><span class="spacer"></span>
       ${c.quem==='secretaria'?'<span class="badge b-sec">Secretaria</span>':''}</div>
     <p class="sub">${esc(c.desc)}</p>
-    ${c.id==='publicacoes'?'<div class="hint">Mantenha o Lattes atualizado: artigos e trabalhos em eventos são importados de lá para o Sucupira. Use este campo para registrar coautoria com discentes/egressos e com instituições estrangeiras.</div>':''}
+    ${c.id==='disciplinas'?'<div class="hint"><b>Não cadastre as disciplinas do PPGEAL</b>: elas são preenchidas pela secretaria. Aqui entram apenas as disciplinas que você ministrou em outros cursos ou programas.</div>':''}
     ${itens.length ? '' : `<label class="nada"><input type="checkbox" id="chkNada" ${estado.nada[c.id]?'checked':''}> Não tive atividades nesta categoria em ${estado.ano}</label>`}
     <div id="listaItens">${itens.map(it=>{ const r=resumoItem(c,it); return `
       <div class="item"><div class="txt"><div class="tt">${esc(r.tt)}</div><div class="meta">${esc(r.meta)}</div></div>
@@ -726,6 +764,7 @@ function inputCampo(f, v){
   const id = `f_${f.id}`, val = esc(v ?? '');
   switch(f.tipo){
     case 'textarea': return `<textarea id="${id}">${val}</textarea>`;
+    case 'radio': return `<div id="${id}" class="seg" role="radiogroup" aria-label="${esc(f.label)}">${f.opcoes.map(o=>`<label><input type="radio" name="${id}" value="${esc(o)}" ${o===v?'checked':''}><span>${esc(o)}</span></label>`).join('')}</div>`;
     case 'select': return `<select id="${id}"><option value="">Selecione…</option>${f.opcoes.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
     case 'year': return `<select id="${id}"><option value="">—</option>${CONFIG.anos.map(a=>`<option ${String(a)===String(v??'')?'selected':''}>${a}</option>`).join('')}</select>`;
     case 'number': return `<input id="${id}" type="number" step="${f.passo||'1'}" min="0" value="${val}">`;
@@ -753,6 +792,7 @@ function abrirForm(c, id){
       <button class="sec" id="btnCancelarItem">Cancelar</button></div></div>`;
   $('#btnCancelarItem').onclick = ()=>{ editando=null; $('#formArea').innerHTML=''; $('#rowAdd').classList.remove('hidden'); };
   $('#btnSalvarItem').onclick = ()=>salvarItem(c);
+  $('#formArea').addEventListener('change', e=>e.target.closest('.invalid')?.classList.remove('invalid'));
   const selL = $('#formArea [data-linha]'), selP = $('#formArea [data-projeto]');
   if(selP){
     const preencher = ()=>{
@@ -768,7 +808,8 @@ function abrirForm(c, id){
 function salvarItem(c){
   const novo = {}; const faltando = [];
   c.campos.forEach(f=>{
-    const el = $(`#f_${f.id}`); let v = el.value.trim();
+    const el = $(`#f_${f.id}`);
+    let v = f.tipo==='radio' ? (el.querySelector('input:checked')?.value || '') : el.value.trim();
     if(f.tipo==='doi' || f.id==='doi') v = v.replace(/^https?:\/\/(dx\.)?doi\.org\//i,'');
     if((f.tipo==='number'||f.tipo==='year') && v!=='') v = Number(v);
     el.classList.toggle('invalid', !!f.obrig && v==='');
@@ -871,8 +912,9 @@ function montarXlsx(pacotes, comStatus){
     const ws = XLSX.utils.aoa_to_sheet(aoa);
     ws['!cols'] = aoa[0].map(h=>({wch: Math.min(48, Math.max(12, h.length+2))}));
     ws['!autofilter'] = {ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:Math.max(aoa.length-1,0), c:aoa[0].length-1}})};
-    XLSX.utils.book_append_sheet(wb, ws, c.titulo.slice(0,31));
+    XLSX.utils.book_append_sheet(wb, ws, (c.aba||c.titulo).slice(0,31));
   });
+  if(comStatus && admin) abasFontes(wb);
   if(!wb.SheetNames.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Sem itens cadastrados']]), 'Vazio');
   return wb;
 }
@@ -929,6 +971,7 @@ function pacotesFiltrados(){
     .sort((a,b)=>a.docente.nome.localeCompare(b.docente.nome,'pt'));
 }
 function renderAdmin(){
+  renderFontes();
   const ps = pacotesFiltrados();
   if(!ps.length){ $('#tabelaStatus').innerHTML = '<p class="sub" style="padding:14px">Nenhuma resposta carregada para este ano.</p>'; return; }
   const cats = CATEGORIAS;
@@ -963,11 +1006,12 @@ function initAdminUI(){
     }catch(err){ msgAdmin('Erro ao carregar: ' + err.message, 'err'); }
   };
   $('#btnLimparAdmin').onclick = async ()=>{
-    if(!await confirmar('Limpar painel', '<p>Remove as respostas carregadas neste navegador (não apaga nada no servidor nem os arquivos).</p>', 'Limpar')) return;
-    admin = {pacotes:{}}; store.set(LS_ADMIN, admin); $('#adminMsg').innerHTML=''; renderAdmin();
+    if(!await confirmar('Limpar painel', '<p>Remove as respostas dos docentes carregadas neste navegador (não apaga nada no servidor, nem os arquivos, nem as fontes externas).</p>', 'Limpar')) return;
+    admin = {pacotes:{}, fontes: admin.fontes}; store.set(LS_ADMIN, admin); $('#adminMsg').innerHTML=''; renderAdmin();
   };
   $('#btnExportXlsx').onclick = ()=>{
-    const ps = pacotesFiltrados(); if(!ps.length) return msgAdmin('Nada para exportar.','err');
+    const ps = pacotesFiltrados(), f = fontes();
+    if(!ps.length && !Object.keys(f.lattes).length && !Object.keys(f.wos).length) return msgAdmin('Nada para exportar.','err');
     try{ XLSX.writeFile(montarXlsx(ps, true), `sucupira-ppgeal-consolidado-${$('#filtroAno').value||'todos'}.xlsx`); }
     catch(e){ msgAdmin(e.message,'err'); }
   };
@@ -976,8 +1020,229 @@ function initAdminUI(){
   };
 }
 
+/* =====================================================================
+   FONTES EXTERNAS — Currículos Lattes (XML/ZIP) e Web of Science
+   ===================================================================== */
+const norm = t => String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+const dataLattes = v => /^\d{8}$/.test(v||'') ? `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}` : (v||'');
+const anoDeDataLattes = v => /^\d{8}$/.test(v||'') ? +v.slice(4) : null;
+function fontes(){ return (admin.fontes ||= {lattes:{}, wos:{}}); }
+function anosFiltro(){ const a = $('#filtroAno').value; return a ? [+a] : CONFIG.anos; }
+function noPeriodo(...anos){ const f = anosFiltro(); return anos.some(a=>a && f.includes(+a)); }
+function docenteCanonico(nome){
+  const n = norm(nome); const d = CONFIG.docentes.find(x=>norm(x)===n);
+  if(d) return d;
+  const p = n.split(' '); // mesmo primeiro e último nome
+  return CONFIG.docentes.find(x=>{ const q=norm(x).split(' '); return q[0]===p[0] && q[q.length-1]===p[p.length-1]; }) || nome;
+}
+
+/* ---------- leitura de arquivos ---------- */
+function decodificar(buf){
+  const b = new Uint8Array(buf);
+  if(b[0]===0xFF && b[1]===0xFE) return new TextDecoder('utf-16le').decode(b);
+  if(b[0]===0xFE && b[1]===0xFF) return new TextDecoder('utf-16be').decode(b);
+  const ini = new TextDecoder('latin1').decode(b.slice(0,200));
+  const m = /encoding=["']([\w-]+)["']/i.exec(ini);
+  return new TextDecoder(m ? m[1] : 'utf-8').decode(b);
+}
+async function xmlsDoArquivo(f){
+  const buf = await f.arrayBuffer();
+  if(/\.zip$/i.test(f.name) || (new Uint8Array(buf)[0]===0x50 && new Uint8Array(buf)[1]===0x4B)){
+    if(typeof JSZip==='undefined') throw new Error('biblioteca de ZIP não carregou');
+    const z = await JSZip.loadAsync(buf); const out = [];
+    for(const e of Object.values(z.files)) if(!e.dir && /\.xml$/i.test(e.name)) out.push({nome:`${f.name}/${e.name}`, texto:decodificar(await e.async('arraybuffer'))});
+    return out;
+  }
+  return [{nome:f.name, texto:decodificar(buf)}];
+}
+
+/* ---------- Lattes ---------- */
+function attr(el, nome){ return el ? (el.getAttribute(nome)||'').trim() : ''; }
+function filho(el, prefixo){ return el ? [...el.children].find(c=>c.tagName.startsWith(prefixo)) : null; }
+function autoresLattes(el){ return [...el.children].filter(c=>c.tagName==='AUTORES')
+  .sort((a,b)=>(+attr(a,'ORDEM-DE-AUTORIA'))-(+attr(b,'ORDEM-DE-AUTORIA'))).map(a=>attr(a,'NOME-COMPLETO-DO-AUTOR')).join('; '); }
+const TIPO_PROTECAO = {PATENTE:'Patente', SOFTWARE:'Programa de computador', MARCA:'Marca', 'DESENHO-INDUSTRIAL':'Desenho industrial',
+  'CULTIVAR-PROTEGIDA':'Cultivar protegida', 'CULTIVAR-REGISTRADA':'Cultivar registrada', 'TOPOGRAFIA-DE-CIRCUITO-INTEGRADO':'Topografia de circuito integrado'};
+const TIPO_PATENTE = {PI:'Patente de invenção', MU:'Modelo de utilidade', CA:'Certificado de adição', DI:'Desenho industrial'};
+function lerLattes(texto, arquivo){
+  const doc = new DOMParser().parseFromString(texto, 'application/xml');
+  const cv = doc.querySelector('CURRICULO-VITAE');
+  if(!cv || doc.querySelector('parsererror')) throw new Error('não é um currículo Lattes em XML');
+  const nome = attr(cv.querySelector('DADOS-GERAIS'), 'NOME-COMPLETO');
+  const r = {id: attr(cv,'NUMERO-IDENTIFICADOR') || nome, nome, docente: docenteCanonico(nome),
+    atualizado: attr(cv,'DATA-ATUALIZACAO'), arquivo, producoes:[], patentes:[]};
+  const prod = (tipo, el, basePref, detPref, tituloAttr, anoAttr, veicAttr) => {
+    const b = filho(el, basePref), d = filho(el, detPref);
+    r.producoes.push({tipo, titulo:attr(b,tituloAttr), ano:+attr(b,anoAttr)||null, veiculo: veicAttr ? attr(d,veicAttr) : '',
+      doi: attr(b,'DOI'), natureza: attr(b,'NATUREZA'), autores: autoresLattes(el)});
+  };
+  doc.querySelectorAll('ARTIGO-PUBLICADO').forEach(el=>prod('Artigo em periódico', el,'DADOS-BASICOS','DETALHAMENTO','TITULO-DO-ARTIGO','ANO-DO-ARTIGO','TITULO-DO-PERIODICO-OU-REVISTA'));
+  doc.querySelectorAll('ARTIGO-ACEITO-PARA-PUBLICACAO').forEach(el=>prod('Artigo aceito para publicação', el,'DADOS-BASICOS','DETALHAMENTO','TITULO-DO-ARTIGO','ANO-DO-ARTIGO','TITULO-DO-PERIODICO-OU-REVISTA'));
+  doc.querySelectorAll('TRABALHO-EM-EVENTOS').forEach(el=>prod('Trabalho em evento', el,'DADOS-BASICOS','DETALHAMENTO','TITULO-DO-TRABALHO','ANO-DO-TRABALHO','NOME-DO-EVENTO'));
+  doc.querySelectorAll('LIVRO-PUBLICADO-OU-ORGANIZADO').forEach(el=>prod('Livro', el,'DADOS-BASICOS','DETALHAMENTO','TITULO-DO-LIVRO','ANO','NOME-DA-EDITORA'));
+  doc.querySelectorAll('CAPITULO-DE-LIVRO-PUBLICADO').forEach(el=>prod('Capítulo de livro', el,'DADOS-BASICOS','DETALHAMENTO','TITULO-DO-CAPITULO-DO-LIVRO','ANO','TITULO-DO-LIVRO'));
+  doc.querySelectorAll('REGISTRO-OU-PATENTE').forEach(reg=>{
+    let el = reg; while(el && !TIPO_PROTECAO[el.tagName]) el = el.parentElement;
+    if(!el) return;
+    const b = filho(el,'DADOS-BASICOS');
+    const tituloB = b ? [...b.attributes].find(a=>a.name.startsWith('TITULO'))?.value : '';
+    const tp = attr(reg,'TIPO-PATENTE');
+    r.patentes.push({
+      tipo: el.tagName==='PATENTE' ? (TIPO_PATENTE[tp] || tp || 'Patente') : TIPO_PROTECAO[el.tagName],
+      titulo: attr(reg,'TITULO-PATENTE') || tituloB || '',
+      ano: +(attr(b,'ANO-DESENVOLVIMENTO') || attr(b,'ANO')) || null,
+      codigo: attr(reg,'CODIGO-DO-REGISTRO-OU-PATENTE'),
+      deposito: attr(reg,'DATA-PEDIDO-DE-DEPOSITO'), concessao: attr(reg,'DATA-DE-CONCESSAO'),
+      instituicao: attr(reg,'INSTITUICAO-DEPOSITO-REGISTRO'),
+      depositante: attr(reg,'NOME-DO-DEPOSITANTE') || attr(reg,'NOME-DO-TITULAR'),
+      pais: attr(b,'PAIS'), inventores: autoresLattes(el)});
+  });
+  // guarda só o quadriênio, para não pesar no navegador
+  const min = Math.min(...CONFIG.anos);
+  r.producoes = r.producoes.filter(p=>!p.ano || p.ano>=min);
+  r.patentes = r.patentes.filter(p=>[p.ano, anoDeDataLattes(p.deposito), anoDeDataLattes(p.concessao)].some(a=>!a || a>=min));
+  return r;
+}
+
+/* ---------- Web of Science ---------- */
+const WOS_COLS = { // tag do arquivo .txt : nome da coluna no Excel exportado
+  TI:'Article Title', AU:'Authors', AF:'Author Full Names', SO:'Source Title', PY:'Publication Year', DI:'DOI',
+  DT:'Document Type', TC:'Times Cited, WoS Core', Z9:'Times Cited, All Databases', C1:'Addresses', SN:'ISSN', EI:'eISSN', UT:'UT (Unique WOS ID)'};
+function linhasWos(nome, buf){
+  if(/\.(xls|xlsx)$/i.test(nome)){
+    const wb = XLSX.read(buf, {type:'array'}); const ws = wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(ws, {defval:''}).map(o=>{
+      const r = {}; Object.entries(WOS_COLS).forEach(([t,c])=>r[t] = String(o[c] ?? o[t] ?? '')); return r; });
+  }
+  const txt = decodificar(buf).replace(/^﻿/,'');
+  const ls = txt.split(/\r?\n/).filter(l=>l.trim());
+  const cab = ls[0].split('\t').map(h=>h.trim().replace(/^﻿/,''));
+  if(!cab.includes('TI') && !cab.includes('Article Title')) throw new Error('não parece uma exportação do Web of Science');
+  return ls.slice(1).map(l=>{ const v = l.split('\t'); const o = {}; cab.forEach((h,i)=>o[h]=v[i]||'');
+    const r = {}; Object.entries(WOS_COLS).forEach(([t,c])=>r[t] = String(o[t] ?? o[c] ?? '')); return r; });
+}
+function paisesWos(c1){
+  const s = new Set();
+  String(c1||'').replace(/\[[^\]]*\]/g,'').split(';').forEach(a=>{
+    const p = a.trim().replace(/\.$/,'').split(',').pop()?.trim(); if(!p) return;
+    s.add(/\bUSA$/.test(p) ? 'USA' : /Peoples R China/i.test(p) ? 'China' : p);
+  });
+  return [...s];
+}
+function docentesNoWos(af, au){
+  const autores = String(af || au).split(';').map(x=>x.trim()).filter(Boolean).map(x=>{
+    const [sob, dado=''] = x.split(','); return {sob:norm(sob), dado:norm(dado)}; });
+  return CONFIG.docentes.filter(d=>{
+    const t = norm(d).split(' '), ult = t[t.length-1], pri = t[0];
+    return autores.some(a=>{
+      if(!a.sob.split(' ').includes(ult)) return false;
+      const dado1 = a.dado.split(' ')[0] || '';
+      // nome completo no WoS (ex.: "Debora") → precisa bater; só iniciais (ex.: "D") → basta a inicial
+      return dado1.length > 2 ? dado1 === pri : dado1.startsWith(pri[0]);
+    });
+  });
+}
+function lerWos(nome, buf){
+  return linhasWos(nome, buf).filter(r=>r.TI).map(r=>({
+    ut:r.UT, titulo:r.TI, periodico:r.SO, ano:+r.PY||null, doi:r.DI.toLowerCase(), tipo:r.DT, autores:r.AF||r.AU,
+    docentes: docentesNoWos(r.AF, r.AU), ufsc: /santa catarina|ufsc/i.test(r.C1) ? 'Sim' : (r.C1 ? 'Não' : '?'),
+    paises: paisesWos(r.C1).join('; '), citacoes: r.TC!=='' ? +r.TC : '', issn: r.SN || r.EI }));
+}
+
+/* ---------- consolidação ---------- */
+function publicacoesLattes(){
+  const wosDois = new Set(Object.values(fontes().wos).map(w=>w.doi).filter(Boolean));
+  const mapa = new Map();
+  Object.values(fontes().lattes).forEach(cv=>cv.producoes.filter(p=>noPeriodo(p.ano)).forEach(p=>{
+    const k = p.doi ? 'doi:'+p.doi.toLowerCase() : 't:'+norm(p.titulo)+'|'+p.ano;
+    const e = mapa.get(k);
+    if(e){ if(!e.docentes.includes(cv.docente)) e.docentes.push(cv.docente); }
+    else mapa.set(k, {...p, docentes:[cv.docente]});
+  }));
+  return [...mapa.values()].map(p=>({...p, noWos: p.doi && wosDois.has(p.doi.toLowerCase()) ? 'Sim' : 'Não'}))
+    .sort((a,b)=>(b.ano||0)-(a.ano||0) || a.titulo.localeCompare(b.titulo,'pt'));
+}
+function patentesLattes(){
+  const mapa = new Map();
+  Object.values(fontes().lattes).forEach(cv=>cv.patentes
+    .filter(p=>noPeriodo(p.ano, anoDeDataLattes(p.deposito), anoDeDataLattes(p.concessao))).forEach(p=>{
+    const k = p.codigo ? 'c:'+norm(p.codigo) : 't:'+norm(p.titulo);
+    const e = mapa.get(k);
+    if(e){ if(!e.docentes.includes(cv.docente)) e.docentes.push(cv.docente); }
+    else mapa.set(k, {...p, docentes:[cv.docente]});
+  }));
+  return [...mapa.values()];
+}
+function wosFiltrado(){ return Object.values(fontes().wos).filter(w=>noPeriodo(w.ano)).sort((a,b)=>(b.ano||0)-(a.ano||0)); }
+function prazoLattesData(){ const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(CONFIG.prazoLattes||''); return m ? `${m[3]}${m[2]}${m[1]}` : null; }
+function abasFontes(wb){
+  const add = (nome, aoa) => { const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = aoa[0].map(h=>({wch: Math.min(50, Math.max(12, String(h).length+2))}));
+    ws['!autofilter'] = {ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:aoa.length-1, c:aoa[0].length-1}})};
+    XLSX.utils.book_append_sheet(wb, ws, nome); };
+  const cvs = Object.values(fontes().lattes);
+  if(cvs.length){
+    const prazo = prazoLattesData(), ymd = v => /^\d{8}$/.test(v) ? v.slice(4)+v.slice(2,4)+v.slice(0,2) : '';
+    add('Lattes – atualização', [['Docente','Nome no Lattes','ID Lattes','Atualizado em', prazo ? `Atualizado até ${CONFIG.prazoLattes}?` : 'Prazo'],
+      ...cvs.sort((a,b)=>a.docente.localeCompare(b.docente,'pt')).map(c=>[c.docente, c.nome, c.id, dataLattes(c.atualizado),
+        prazo ? (ymd(c.atualizado) && ymd(c.atualizado) <= prazo ? 'Sim' : 'Não') : 'defina prazoLattes'])]);
+    add('Publicações (Lattes)', [['Docentes PPGEAL','Tipo','Ano','Título','Periódico / evento / livro','DOI','Também no WoS?','Autores'],
+      ...publicacoesLattes().map(p=>[p.docentes.join('; '), p.tipo, p.ano, p.titulo, p.veiculo, p.doi ? 'https://doi.org/'+p.doi : '', p.noWos, p.autores])]);
+    add('Patentes (Lattes)', [['Docentes PPGEAL','Tipo da proteção','Título','Ano','Código de registro','Data de depósito','Data da concessão','Instituição de depósito','Depositante / titular','País','Inventores'],
+      ...patentesLattes().map(p=>[p.docentes.join('; '), p.tipo, p.titulo, p.ano, p.codigo, dataLattes(p.deposito), dataLattes(p.concessao), p.instituicao, p.depositante, p.pais, p.inventores])]);
+  }
+  const ws = wosFiltrado();
+  if(ws.length) add('Publicações (WoS)', [['Ano','Título','Periódico','DOI','Tipo de documento','Docentes PPGEAL (pelo nome)','Endereço UFSC?','Países','Citações (WoS)','ISSN','Autores','ID WoS'],
+    ...ws.map(w=>[w.ano, w.titulo, w.periodico, w.doi ? 'https://doi.org/'+w.doi : '', w.tipo, w.docentes.join('; '), w.ufsc, w.paises, w.citacoes, w.issn, w.autores, w.ut])]);
+}
+function renderFontes(){
+  const cvs = Object.values(fontes().lattes).sort((a,b)=>a.docente.localeCompare(b.docente,'pt'));
+  const anos = anosFiltro(), rot = anos.length===1 ? anos[0] : `${anos[0]}–${anos[anos.length-1]}`;
+  $('#resumoLattes').innerHTML = cvs.length ? `<div class="tblwrap"><table><tr><th>Docente</th><th>Lattes atualizado em</th><th>Artigos ${rot}</th><th>Eventos ${rot}</th><th>Livros/cap. ${rot}</th><th>Patentes ${rot}</th></tr>
+    ${cvs.map(c=>{ const pr = c.producoes.filter(p=>noPeriodo(p.ano)); const n = t => pr.filter(p=>t.includes(p.tipo)).length;
+      const pt = c.patentes.filter(p=>noPeriodo(p.ano, anoDeDataLattes(p.deposito), anoDeDataLattes(p.concessao))).length;
+      const docOk = CONFIG.docentes.includes(c.docente);
+      return `<tr><td>${esc(c.docente)}${docOk?'':' <span class="badge b-pend" title="Nome não encontrado na lista de docentes">fora da lista</span>'}</td><td>${dataLattes(c.atualizado)}</td>
+        <td class="n">${n(['Artigo em periódico','Artigo aceito para publicação'])}</td><td class="n">${n(['Trabalho em evento'])}</td><td class="n">${n(['Livro','Capítulo de livro'])}</td><td class="n">${pt}</td></tr>`; }).join('')}
+    </table></div><p class="sub" style="margin-top:6px">${cvs.length} de ${CONFIG.docentes.length} docentes importados. Faltam: ${esc(CONFIG.docentes.filter(d=>!cvs.some(c=>c.docente===d)).join(', ') || 'nenhum')}.</p>`
+    : '<p class="sub">Nenhum currículo importado.</p>';
+  const ws = wosFiltrado(), todos = Object.keys(fontes().wos).length;
+  $('#resumoWos').innerHTML = todos
+    ? `<p><b>${ws.length}</b> publicações em ${rot} (de ${todos} importadas) · <b>${ws.filter(w=>w.ufsc==='Sim').length}</b> com endereço UFSC · <b>${ws.filter(w=>w.docentes.length).length}</b> com docente do PPGEAL identificado pelo nome.</p>`
+    : '<p class="sub">Nenhuma exportação importada.</p>';
+}
+function initFontesUI(){
+  $('#arquivosLattes').onchange = async e=>{
+    const ok=[], erros=[];
+    for(const f of e.target.files){
+      try{ for(const x of await xmlsDoArquivo(f)){ try{ ok.push(lerLattes(x.texto, x.nome)); }catch(err){ erros.push(`${x.nome} (${err.message})`); } } }
+      catch(err){ erros.push(`${f.name} (${err.message})`); }
+    }
+    e.target.value='';
+    ok.forEach(cv=>fontes().lattes[cv.id] = cv);
+    if(!store.set(LS_ADMIN, admin)) erros.push('o navegador não conseguiu guardar tudo; exporte o Excel antes de fechar');
+    $('#msgFontes').innerHTML = `<div class="msg ${erros.length?'err':'ok'}">${ok.length} currículo(s) importado(s)${erros.length?'. Problemas: '+esc(erros.join('; ')):''}</div>`;
+    renderFontes();
+  };
+  $('#arquivosWos').onchange = async e=>{
+    let n=0; const erros=[];
+    for(const f of e.target.files){
+      try{ lerWos(f.name, await f.arrayBuffer()).forEach(w=>{ fontes().wos[w.ut || w.doi || norm(w.titulo)] = w; n++; }); }
+      catch(err){ erros.push(`${f.name} (${err.message})`); }
+    }
+    e.target.value='';
+    store.set(LS_ADMIN, admin);
+    $('#msgFontes').innerHTML = `<div class="msg ${erros.length?'err':'ok'}">${n} registro(s) do Web of Science importado(s)${erros.length?'. Problemas: '+esc(erros.join('; ')):''}</div>`;
+    renderFontes();
+  };
+  $('#btnLimparFontes').onclick = async ()=>{
+    if(!await confirmar('Limpar fontes externas', '<p>Remove os currículos Lattes e os registros do Web of Science importados neste navegador.</p>', 'Limpar')) return;
+    admin.fontes = {lattes:{}, wos:{}}; store.set(LS_ADMIN, admin); $('#msgFontes').innerHTML=''; renderFontes();
+  };
+}
+
 /* ---------- início ---------- */
-initIdent(); initBarra(); initAdminUI();
+initIdent(); initBarra(); initAdminUI(); initFontesUI();
 $('#formSenha').addEventListener('submit', async e=>{
   e.preventDefault();
   if(await sha256($('#campoSenha').value) === CONFIG.senhaSecretariaHash){
