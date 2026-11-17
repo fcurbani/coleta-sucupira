@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coleta Sucupira · PPGEAL/UFSC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+/* =====================================================================
+   CONFIGURAÇÃO — edite apenas este bloco
+   ===================================================================== */
+const CONFIG = {
+  programa: 'PPGEAL – Programa de Pós-Graduação em Engenharia de Alimentos / UFSC',
+  quadrienio: '2025–2029',
+  anos: [2025, 2026, 2027, 2028, 2029],
+  anoPadrao: 2026,
+  prazo: '',                       // ex.: '15/02/2027' (aparece no topo; deixe '' para ocultar)
+  emailSecretaria: 'ppgeal@contato.ufsc.br',   // confira o e-mail correto
+  // URL do Google Apps Script publicado como "App da Web" (ver README).
+  // Deixe '' para o modo sem servidor: o docente baixa um arquivo e envia por e-mail.
+  endpoint: '',
+  // Lista de docentes para autocompletar (o docente também pode digitar outro nome)
+  docentes: [
+    'Acácio Antônio Ferreira Zielinski', 'Alan Ambrosi', 'Alcilene Rodrigues Monteiro Fritz',
+    'Bruno Augusto Mattar Carciofi', 'Débora de Oliveira', 'Elane Schwinden Prudêncio',
+    'Franciny Campos Schmidt', 'Germán Ayala Valência', 'Jaciane Lutz Ienczak',
+    'Jéssica de Matos Fonseca', 'João Borges Laurindo', 'Marcelo Lanza',
+    'Marco Di Luccio', 'Patrícia Poletto', 'Sandra Regina Salvador Ferreira'
+  ],
+  // Hierarquia: área de concentração → linhas de pesquisa → projetos de pesquisa do programa
+  areaConcentracao: 'Desenvolvimento de Processos da Indústria de Alimentos',
+  linhas: [
+    {nome:'Desenvolvimento de Produtos e Processos', projetos:[
+      'Desenvolvimento de embalagens biodegradáveis e filmes/coberturas comestíveis',
+      'Desenvolvimento e processamento de produtos de origem animal e vegetal',
+      'Valorização de resíduos agroindustriais no conceito de economia circular']},
+    {nome:'Engenharia de Bioprocessos e Cinética Microbiana', projetos:[
+      'Bioprocessos aplicados a alimentos',
+      'Microbiologia preditiva',
+      'Desenvolvimento de bioprodutos']},
+    {nome:'Fenômenos de Transporte e Processos de Separação', projetos:[
+      'Processos de separação a alta pressão',
+      'Processos de separação por membranas',
+      'Termodinâmica aplicada à engenharia de alimentos',
+      'Transferência de calor e massa no processamento de alimentos']}
+  ]
+};
+</script>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --ink:#1c2430; --mute:#5d6878; --line:#dfe3ea;
+  --pri:#0b4f8a; --pri-2:#e8f0f8; --ok:#1f7a4d; --ok-2:#e5f4ec; --warn:#9a6200; --warn-2:#fdf3e1;
+  --err:#b42318; --radius:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Source Sans 3',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
+header.top{background:var(--pri);color:#fff;padding:18px 24px}
+header.top .wrap{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+header.top h1{margin:0;font-size:1.35rem;font-weight:700}
+header.top p{margin:2px 0 0;opacity:.85;font-size:.92rem}
+header.top .modo{font-size:.85rem;opacity:.9}
+header.top a{color:#fff}
+.wrap{max-width:1080px;margin:0 auto}
+main{padding:20px 24px 80px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+h2{font-size:1.15rem;margin:0 0 4px}
+h3{font-size:1.02rem;margin:0}
+.sub{color:var(--mute);font-size:.92rem;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px 14px}
+.f-full{grid-column:span 6}.f-half{grid-column:span 3}.f-third{grid-column:span 2}
+@media (max-width:720px){.f-half,.f-third{grid-column:span 6}}
+label{display:block;font-weight:600;font-size:.88rem;margin-bottom:4px}
+label .req{color:var(--err)}
+.help{font-weight:400;color:var(--mute);font-size:.8rem;display:block}
+input,select,textarea{width:100%;font:inherit;font-size:.95rem;padding:8px 10px;border:1px solid #c9d0da;border-radius:7px;background:#fff;color:var(--ink)}
+textarea{min-height:76px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--pri);outline-offset:-1px;border-color:var(--pri)}
+.invalid{border-color:var(--err)!important;background:#fff6f5}
+button{font:inherit;font-weight:600;font-size:.92rem;border-radius:7px;padding:8px 14px;cursor:pointer;border:1px solid var(--pri);background:var(--pri);color:#fff}
+button.sec{background:#fff;color:var(--pri)}
+button.ghost{background:transparent;border-color:transparent;color:var(--pri);padding:6px 8px}
+button.danger{background:#fff;color:var(--err);border-color:#e7b4ae}
+button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+/* categorias */
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:10px}
+.cat{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;background:#fff;cursor:pointer;text-align:left;color:var(--ink);font-weight:400;display:flex;flex-direction:column;gap:6px;min-height:92px}
+.cat:hover{border-color:var(--pri)}
+.cat.ativa{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri) inset}
+.cat .t{font-weight:700;font-size:.95rem}
+.badge{display:inline-block;font-size:.76rem;font-weight:700;padding:2px 8px;border-radius:99px}
+.b-pend{background:var(--warn-2);color:var(--warn)}
+.b-ok{background:var(--ok-2);color:var(--ok)}
+.b-nada{background:#eef0f3;color:var(--mute)}
+.b-sec{background:var(--pri-2);color:var(--pri)}
+/* itens */
+.item{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.item .txt{flex:1;min-width:0}
+.item .tt{font-weight:600}
+.item .meta{color:var(--mute);font-size:.86rem;overflow-wrap:anywhere}
+.nada{display:flex;gap:8px;align-items:center;font-size:.92rem;margin:6px 0 14px;color:var(--mute)}
+.nada input{width:auto}
+.formbox{background:#fafbfc;border:1px dashed #c3cbd6;border-radius:var(--radius);padding:16px;margin-top:10px}
+.msg{padding:10px 14px;border-radius:8px;margin:10px 0;font-size:.93rem}
+.msg.ok{background:var(--ok-2);color:var(--ok)}
+.msg.err{background:#fdecea;color:var(--err)}
+.msg.info{background:var(--pri-2);color:var(--pri)}
+.hint{background:var(--warn-2);color:#6b4600;padding:10px 14px;border-radius:8px;font-size:.9rem;margin-bottom:12px}
+.stick{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 24px;z-index:5}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#f0f2f5;font-weight:700;position:sticky;top:0}
+td.n{text-align:center}
+.tblwrap{overflow:auto;max-height:520px;border:1px solid var(--line);border-radius:8px}
+.hidden{display:none!important}
+dialog{border:none;border-radius:12px;padding:22px;max-width:520px;width:92%;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(20,30,45,.45)}
+code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div>
+    <h1>Coleta de dados Sucupira</h1>
+    <p id="progName"></p>
+  </div>
+  <div class="modo" id="modoLink"></div>
+</div></header>
+
+<main class="wrap">
+  <!-- ================= VISÃO DOCENTE ================= -->
+  <section id="viewDocente">
+    <div class="card">
+      <h2>1. Identificação</h2>
+      <p class="sub" id="introTxt">Preencha uma vez. Suas respostas ficam salvas neste navegador até você enviar e podem ser editadas e reenviadas depois.</p>
+      <div class="grid">
+        <div class="f-half"><label for="dNome">Nome do(a) docente <span class="req">*</span></label>
+          <select id="dNome"></select></div>
+        <div class="f-third"><label for="dEmail">E-mail <span class="req">*</span></label>
+          <input id="dEmail" type="email" autocomplete="email"></div>
+        <div class="f-third" style="grid-column:span 1"><label for="dAno">Ano-base <span class="req">*</span></label>
+          <select id="dAno"></select></div>
+      </div>
+      <datalist id="listaDocentes"></datalist>
+      
+    </div>
+
+    <div class="card">
+      <div class="row"><h2>2. Atividades do ano-base</h2><span class="spacer"></span><span class="sub" style="margin:0" id="progresso"></span></div>
+      <p class="sub">Abra cada categoria e cadastre suas atividades, ou marque “Não tive atividades nesta categoria”. Uma atividade com vários docentes do PPGEAL pode ser cadastrada só pelo(a) coordenador(a).</p>
+      <div class="cats" id="cats"></div>
+    </div>
+
+    <div class="card hidden" id="painelCat"></div>
+  </section>
+
+  <!-- ================= VISÃO SECRETARIA ================= -->
+  <section id="viewAdmin" class="hidden">
+    <div class="card">
+      <h2>Painel da secretaria</h2>
+      <p class="sub">Junte as respostas dos docentes e exporte uma planilha consolidada, com uma aba por categoria.</p>
+      <div class="row" style="margin-bottom:10px">
+        <div id="boxServidor" class="row hidden">
+          <input id="chaveAdmin" type="password" placeholder="Chave de administração" style="width:220px">
+          <button id="btnCarregarServidor">Carregar do servidor</button>
+        </div>
+        <label class="row" style="margin:0;font-weight:600">
+          <span style="display:inline-block;padding:8px 14px;border:1px solid var(--pri);border-radius:7px;color:var(--pri);background:#fff;cursor:pointer">Importar arquivos .json dos docentes</span>
+          <input id="arquivosJson" type="file" accept=".json,application/json" multiple class="hidden">
+        </label>
+        <button class="danger" id="btnLimparAdmin">Limpar</button>
+      </div>
+      <div id="adminMsg"></div>
+      <div class="row" style="margin:6px 0 12px">
+        <label for="filtroAno" style="margin:0">Ano-base</label>
+        <select id="filtroAno" style="width:auto"></select>
+        <span class="spacer"></span>
+        <button id="btnExportXlsx">Exportar Excel consolidado</button>
+        <button class="sec" id="btnExportJsonAdmin">Backup .json</button>
+      </div>
+      <div class="tblwrap" id="tabelaStatus"></div>
+      <p class="sub" style="margin-top:8px">✔ n = itens cadastrados · “—” = declarou não ter atividades · em branco = não respondeu.</p>
+    </div>
+    <div class="card">
+      <h2>Lançamentos da secretaria</h2>
+      <p class="sub">Categorias que a própria secretaria preenche (por exemplo, perfil de formação dos ingressantes) ficam na <a href="#secretaria">visão de lançamento da secretaria</a>. Elas usam o mesmo formulário e entram no consolidado ao importar o arquivo gerado.</p>
+    </div>
+  </section>
+</main>
+
+<div class="stick" id="barraEnvio">
+  <div class="wrap row">
+    <button class="sec" id="btnBaixarXlsxDoc">Baixar minhas respostas (Excel)</button>
+    <button class="ghost" id="btnBackup">Salvar cópia (.json)</button>
+    <label class="ghost" style="margin:0;font-weight:600;color:var(--pri);cursor:pointer;padding:6px 8px">Abrir cópia…
+      <input type="file" id="arquivoRestaurar" accept=".json" class="hidden"></label>
+    <span class="spacer"></span>
+    <span id="statusEnvio" class="sub" style="margin:0"></span>
+    <button id="btnEnviar">Enviar à secretaria</button>
+  </div>
+</div>
+
+<dialog id="dlg">
+  <h3 id="dlgTitulo"></h3>
+  <div id="dlgCorpo" style="margin:10px 0 18px"></div>
+  <div class="row"><span class="spacer"></span><button class="sec" id="dlgCancelar">Cancelar</button><button id="dlgOk">OK</button></div>
+</dialog>
+
+<script>
+/* =====================================================================
+   CATEGORIAS — espelham as planilhas atuais do PPGEAL
+   tipo: text | textarea | number | date | year | url | select | linha
+   largura: full | half | third
+   ===================================================================== */
+const ABRANGENCIA = ['Local','Regional','Nacional','Internacional','Online – Nacional','Online – Internacional'];
+const CATEGORIAS = [
+ {id:'publicacoes', titulo:'Publicações', quem:'docente',
+  desc:'Produção com discente/egresso do PPGEAL ou com instituição estrangeira. A produção completa vem do Lattes; aqui interessam os vínculos que o Lattes não mostra.',
+  resumo:['titulo','veiculo','ano'],
+  campos:[
+   {id:'titulo',label:'Título da produção',tipo:'text',obrig:1,larg:'full'},
+   {id:'tipo',label:'Tipo de publicação',tipo:'select',opcoes:['Artigo em periódico','Trabalho completo em anais','Capítulo de livro','Livro','Outro'],obrig:1,larg:'third'},
+   {id:'veiculo',label:'Periódico / veículo',tipo:'text',obrig:1,larg:'third'},
+   {id:'ano',label:'Ano',tipo:'year',obrig:1,larg:'third'},
+   {id:'doi',label:'DOI',tipo:'text',larg:'half',ajuda:'ex.: 10.1016/j.molliq.2025.129151'},
+   {id:'discentes',label:'Autor(es) discente/egresso do PPGEAL',tipo:'text',larg:'half'},
+   {id:'instituicoes',label:'Instituições envolvidas',tipo:'text',larg:'half'},
+   {id:'paises',label:'Países envolvidos',tipo:'text',larg:'half'},
+   {id:'citacoes',label:'Número de citações',tipo:'number',larg:'third'},
+   {id:'fi',label:'Fator de impacto',tipo:'number',larg:'third',passo:'0.001'}
+  ]},
+ {id:'missoes', titulo:'Missões e cooperação', quem:'docente',
+  desc:'Missões institucionais e de cooperação científica com instituição estrangeira (enviadas ou recebidas).',
+  resumo:['local','tipoCoop','inicio'],
+  campos:[
+   {id:'local',label:'Local da missão (instituição, cidade, país)',tipo:'text',obrig:1,larg:'full'},
+   {id:'tipoCoop',label:'Tipo de cooperação',tipo:'select',opcoes:['Missão de trabalho (enviada)','Missão de estudo / pós-doutorado / sabático','Professor(a) visitante recebido(a)','Projeto de cooperação internacional','Outro'],obrig:1,larg:'half'},
+   {id:'projeto',label:'Projeto de cooperação vinculado',tipo:'text',larg:'half'},
+   {id:'inicio',label:'Início',tipo:'date',obrig:1,larg:'third'},
+   {id:'fim',label:'Fim',tipo:'date',larg:'third'},
+   {id:'externos',label:'Professores externos envolvidos',tipo:'text',larg:'full'}
+  ]},
+ {id:'solidariedade', titulo:'Solidariedade institucional', quem:'docente',
+  desc:'Ações de solidariedade do PPGEAL com outras instituições (PROCAD, DINTER/MINTER, acordos de cooperação etc.).',
+  resumo:['instituicao','tipoAcordo','inicio'],
+  campos:[
+   {id:'instituicao',label:'Universidade / PPG vinculado',tipo:'text',obrig:1,larg:'half'},
+   {id:'tipoAcordo',label:'Tipo de acordo institucional',tipo:'select',opcoes:['PROCAD','DINTER','MINTER','Acordo de cooperação','Nucleação / apoio a programa emergente','Outro'],obrig:1,larg:'half'},
+   {id:'processo',label:'Número do processo',tipo:'text',larg:'third'},
+   {id:'agencia',label:'Agência / instituição de aprovação',tipo:'text',larg:'third'},
+   {id:'inicio',label:'Início',tipo:'date',larg:'third'},
+   {id:'fim',label:'Fim',tipo:'date',larg:'third'},
+   {id:'coordenador',label:'Docente coordenador(a)/responsável',tipo:'text',larg:'third'},
+   {id:'docentes',label:'Docentes envolvidos',tipo:'text',larg:'third'},
+   {id:'atividades',label:'Atividades realizadas',tipo:'textarea',larg:'full'}
+  ]},
+ {id:'eventos', titulo:'Organização de eventos', quem:'docente',
+  desc:'Eventos organizados com participação de docentes do PPGEAL.',
+  resumo:['nome','ano','participantes'],
+  campos:[
+   {id:'nome',label:'Nome do evento',tipo:'text',obrig:1,larg:'full'},
+   {id:'natureza',label:'Natureza do evento',tipo:'text',larg:'full',ajuda:'ex.: científico, divulgação, extensão, workshop'},
+   {id:'docentes',label:'Docentes do PPGEAL na organização',tipo:'text',larg:'full'},
+   {id:'inicio',label:'Início',tipo:'date',larg:'third'},
+   {id:'fim',label:'Fim',tipo:'date',larg:'third'},
+   {id:'ano',label:'Ano',tipo:'year',obrig:1,larg:'third'},
+   {id:'participantes',label:'Número de participantes',tipo:'number',larg:'third'}
+  ]},
+ {id:'palestras', titulo:'Palestras ministradas', quem:'docente',
+  desc:'Palestras, conferências e mesas-redondas ministradas.',
+  resumo:['titulo','evento','abrangencia'],
+  campos:[
+   {id:'titulo',label:'Título da palestra',tipo:'text',obrig:1,larg:'full'},
+   {id:'evento',label:'Nome do evento',tipo:'text',obrig:1,larg:'half'},
+   {id:'abrangencia',label:'Abrangência',tipo:'select',opcoes:ABRANGENCIA,obrig:1,larg:'half'},
+   {id:'ano',label:'Ano',tipo:'year',obrig:1,larg:'third'},
+   {id:'participantes',label:'Número de participantes',tipo:'number',larg:'third'}
+  ]},
+ {id:'patentes', titulo:'Patentes e registros', quem:'docente',
+  desc:'Patentes e outros registros depositados ou concedidos.',
+  resumo:['titulo','tipo','dataDeposito'],
+  campos:[
+   {id:'titulo',label:'Título',tipo:'text',obrig:1,larg:'full'},
+   {id:'tipo',label:'Tipo da proteção',tipo:'select',opcoes:['Patente de invenção','Modelo de utilidade','Programa de computador','Cultivar','Desenho industrial','Marca','Outro'],obrig:1,larg:'third'},
+   {id:'dataDeposito',label:'Data de depósito',tipo:'date',larg:'third'},
+   {id:'dataConcessao',label:'Data da concessão',tipo:'date',larg:'third'},
+   {id:'codInterno',label:'Código interno',tipo:'text',larg:'third'},
+   {id:'codRegistro',label:'Código de registro',tipo:'text',larg:'third'},
+   {id:'pais',label:'País',tipo:'text',larg:'third'},
+   {id:'depositante',label:'Instituição depositante',tipo:'text',larg:'half'},
+   {id:'cotitulares',label:'Cotitulares',tipo:'text',larg:'half'},
+   {id:'inventores',label:'Inventores / autores / melhoristas',tipo:'text',larg:'full'},
+   {id:'transferencia',label:'Transferência de tecnologia/conhecimento',tipo:'text',larg:'half',ajuda:'Descreva, ou deixe em branco se não houve'},
+   {id:'processoFomento',label:'Processo da agência de fomento',tipo:'text',larg:'half'}
+  ]},
+ {id:'extensao', titulo:'Ações de extensão', quem:'docente',
+  desc:'Extensão, popularização da ciência e outras interações com a sociedade que você coordena.',
+  resumo:['titulo','local','inicio'],
+  campos:[
+   {id:'titulo',label:'Título da ação / projeto',tipo:'text',obrig:1,larg:'full'},
+   {id:'local',label:'Local',tipo:'text',larg:'third'},
+   {id:'inicio',label:'Início',tipo:'date',larg:'third'},
+   {id:'fim',label:'Fim',tipo:'date',larg:'third'},
+   {id:'publico',label:'Público-alvo',tipo:'text',larg:'full'},
+   {id:'resumo',label:'Resumo da atividade',tipo:'textarea',larg:'full'},
+   {id:'docentes',label:'Docentes envolvidos',tipo:'text',larg:'half'},
+   {id:'discentes',label:'Discentes envolvidos',tipo:'text',larg:'half'}
+  ]},
+ {id:'cursosExtensao', titulo:'Cursos de extensão', quem:'docente',
+  desc:'Cursos de extensão ministrados.',
+  resumo:['curso','ano','carga'],
+  campos:[
+   {id:'curso',label:'Código / nome do curso',tipo:'text',obrig:1,larg:'full'},
+   {id:'linha',label:'Linha de pesquisa',tipo:'linha',todas:1,larg:'half'},
+   {id:'ano',label:'Ano de realização',tipo:'year',obrig:1,larg:'third',},
+   {id:'carga',label:'Carga horária (h)',tipo:'number',larg:'third'},
+   {id:'inicio',label:'Início',tipo:'date',larg:'third'},
+   {id:'fim',label:'Fim',tipo:'date',larg:'third'}
+  ]},
+ {id:'comites', titulo:'Comitês e representações', quem:'docente',
+  desc:'Editoriais científicos, comitês técnicos, representações institucionais e assessorias.',
+  resumo:['categoria','atuacao'],
+  campos:[
+   {id:'categoria',label:'Categoria',tipo:'select',opcoes:['Editorias e publicações científicas','Comitês e grupos técnicos','Representações institucionais e assessorias'],obrig:1,larg:'half'},
+   {id:'inicio',label:'Início',tipo:'date',larg:'third'},
+   {id:'atuacao',label:'Atuação',tipo:'textarea',obrig:1,larg:'full',ajuda:'ex.: Editor associado do periódico X; membro do comitê de assessoramento CA-XX do CNPq'}
+  ]},
+ {id:'projetos', titulo:'Projetos de pesquisa', quem:'docente',
+  desc:'Projetos de pesquisa e financiamentos em que você é responsável.',
+  resumo:['titulo','fomento','inicio'],
+  campos:[
+   {id:'titulo',label:'Título',tipo:'text',obrig:1,larg:'full'},
+   {id:'processo',label:'Processo',tipo:'text',larg:'third'},
+   {id:'fomento',label:'Órgão de fomento',tipo:'text',obrig:1,larg:'third'},
+   {id:'recursos',label:'Recursos aprovados (R$)',tipo:'number',larg:'third',passo:'0.01'},
+   {id:'inicio',label:'Início da vigência',tipo:'date',larg:'third'},
+   {id:'fim',label:'Fim da vigência',tipo:'date',larg:'third'},
+   {id:'linha',label:'Linha de pesquisa',tipo:'linha',obrig:1,larg:'half'},
+   {id:'projetoPPG',label:'Projeto de pesquisa do programa',tipo:'projetoPPG',obrig:1,larg:'half',ajuda:'Projeto da linha ao qual este trabalho se vincula'},
+   {id:'outras',label:'Outras informações',tipo:'textarea',larg:'full'}
+  ]},
+ {id:'convenios', titulo:'Convênios e acordos', quem:'docente',
+  desc:'Convênios com ou sem financiamento com empresas, universidades e institutos (nacionais e internacionais).',
+  resumo:['titulo','conveniada','inicio'],
+  campos:[
+   {id:'titulo',label:'Título do convênio',tipo:'text',obrig:1,larg:'full'},
+   {id:'conveniada',label:'Instituição conveniada',tipo:'text',obrig:1,larg:'half'},
+   {id:'tipoConvenio',label:'Tipo do convênio',tipo:'select',opcoes:['Empresa','Universidade nacional','Universidade estrangeira','Instituto de pesquisa','Órgão público','Outro'],larg:'half'},
+   {id:'processo',label:'Processo',tipo:'text',larg:'third'},
+   {id:'inicio',label:'Início da vigência',tipo:'date',larg:'third'},
+   {id:'fim',label:'Final da vigência',tipo:'date',larg:'third'},
+   {id:'executor',label:'Executor',tipo:'text',larg:'half'},
+   {id:'recursos',label:'Recurso financeiro (R$)',tipo:'number',larg:'half',passo:'0.01',ajuda:'Deixe em branco se sem financiamento'}
+  ]},
+ {id:'destaques', titulo:'Produtos em destaque', quem:'docente',
+  desc:'Produtos que você indicaria como destaque do quadriênio (artigo, patente, processo, software, evento etc.).',
+  resumo:['titulo','tipo','ano'],
+  campos:[
+   {id:'titulo',label:'Título do produto',tipo:'text',obrig:1,larg:'full'},
+   {id:'tipo',label:'Tipo de produto',tipo:'select',opcoes:['Artigo','Livro / capítulo','Patente','Software / aplicativo','Processo / tecnologia','Evento','Material didático','Outro'],obrig:1,larg:'third'},
+   {id:'ano',label:'Ano',tipo:'year',larg:'third'},
+   {id:'link',label:'Link / DOI',tipo:'text',larg:'third'},
+   {id:'justificativa',label:'Por que é destaque (impacto)',tipo:'textarea',obrig:1,larg:'full'}
+  ]},
+ {id:'disciplinas', titulo:'Disciplinas ministradas', quem:'docente',
+  desc:'Disciplinas do PPGEAL ministradas no ano-base.',
+  resumo:['disciplina','ano'],
+  campos:[
+   {id:'disciplina',label:'Código e nome da disciplina',tipo:'text',obrig:1,larg:'full',ajuda:'ex.: EAL 3002 – Termodinâmica'},
+   {id:'ano',label:'Ano',tipo:'year',obrig:1,larg:'third'},
+   {id:'linha',label:'Linha de pesquisa',tipo:'linha',todas:1,larg:'half'}
+  ]},
+ {id:'egressos', titulo:'Egressos', quem:'docente',
+  desc:'Onde estão atuando seus ex-orientandos do PPGEAL.',
+  resumo:['nome','nivel','cargo'],
+  campos:[
+   {id:'nome',label:'Nome do(a) egresso(a)',tipo:'text',obrig:1,larg:'half'},
+   {id:'nivel',label:'Nível',tipo:'select',opcoes:['Mestrado','Doutorado'],obrig:1,larg:'third'},
+   {id:'cargo',label:'Cargo / função e instituição',tipo:'text',obrig:1,larg:'full'},
+   {id:'setor',label:'Setor de atuação',tipo:'select',opcoes:['Academia / ensino superior','Pesquisa (instituto)','Indústria / empresa','Governo / órgão público','Organismo internacional','Empreendedor(a) / startup','Terceiro setor','Outro'],larg:'half'},
+   {id:'lattes',label:'Lattes / ORCID',tipo:'text',larg:'half'}
+  ]},
+ {id:'formacaoIngressantes', titulo:'Perfil de formação dos ingressantes', quem:'secretaria',
+  desc:'Formação na graduação (e no mestrado, para o doutorado) dos discentes matriculados.',
+  resumo:['nome','nivel','graduacao'],
+  campos:[
+   {id:'nome',label:'Nome do(a) discente',tipo:'text',obrig:1,larg:'half'},
+   {id:'nivel',label:'Nível',tipo:'select',opcoes:['Mestrado','Doutorado'],obrig:1,larg:'third'},
+   {id:'graduacao',label:'Formação na graduação (curso e instituição)',tipo:'text',obrig:1,larg:'half'},
+   {id:'mestrado',label:'Formação no mestrado (se doutorado)',tipo:'text',larg:'half'}
+  ]}
+];
+
+/* ===================================================================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2));
+const LS_KEY = 'ppgeal-sucupira-v1';
+const LS_ADMIN = 'ppgeal-sucupira-admin-v1';
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+};
+const fmtData = v => { if(!v) return ''; const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v); return m?`${m[3]}/${m[2]}/${m[1]}`:v; };
+const slug = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase();
+
+let modo = 'docente';        // docente | secretaria | admin
+let estado = null;           // rascunho do docente
+let catAberta = null;
+let editando = null;         // _id do item em edição
+
+function estadoVazio(){ return {versao:1, docente:{nome:'',email:''}, ano:CONFIG.anoPadrao, itens:{}, nada:{}, enviadoEm:null, alteradoEm:null}; }
+function categoriasVisiveis(){ return CATEGORIAS.filter(c => modo==='secretaria' ? c.quem==='secretaria' : c.quem==='docente'); }
+function chaveLocal(){ return LS_KEY + (modo==='secretaria' ? '-sec' : ''); }
+function salvar(){ estado.alteradoEm = new Date().toISOString(); store.set(chaveLocal(), estado); atualizarStatusEnvio(); }
+
+/* ---------- roteamento ---------- */
+function rotear(){
+  const h = location.hash.replace('#','');
+  modo = h==='admin' ? 'admin' : h==='secretaria' ? 'secretaria' : 'docente';
+  $('#viewDocente').classList.toggle('hidden', modo==='admin');
+  $('#viewAdmin').classList.toggle('hidden', modo!=='admin');
+  $('#barraEnvio').classList.toggle('hidden', modo==='admin');
+  $('#modoLink').innerHTML = modo==='docente'
+    ? `<a href="#admin">Área da secretaria</a>`
+    : `<a href="#">Voltar ao formulário do docente</a>${modo==='secretaria'?' · <a href="#admin">Painel</a>':''}`;
+  if(modo==='admin'){ iniciarAdmin(); return; }
+  estado = store.get(chaveLocal()) || estadoVazio();
+  estado.itens ||= {}; estado.nada ||= {};
+  if(modo==='secretaria' && !estado.docente.nome){ estado.docente.nome='Secretaria PPGEAL'; }
+  $('#introTxt').textContent = modo==='secretaria'
+    ? 'Lançamentos feitos pela secretaria. Ao terminar, baixe o arquivo .json (ou envie, se houver servidor) para entrar no consolidado.'
+    : 'Preencha uma vez. Suas respostas ficam salvas neste navegador até você enviar e podem ser editadas e reenviadas depois.';
+  $('#dNome').value = estado.docente.nome; $('#dEmail').value = estado.docente.email; $('#dAno').value = estado.ano;
+  catAberta = null; editando = null;
+  renderCats(); $('#painelCat').classList.add('hidden'); atualizarStatusEnvio();
+}
+
+/* ---------- identificação ---------- */
+function initIdent(){
+  $('#progName').textContent = `${CONFIG.programa} · Área de concentração: ${CONFIG.areaConcentracao} · Quadriênio ${CONFIG.quadrienio}` + (CONFIG.prazo ? ` · Prazo: ${CONFIG.prazo}` : '');
+  $('#listaDocentes').innerHTML = CONFIG.docentes.map(n=>`<option value="${esc(n)}">`).join('');
+  $('#dNome').innerHTML = '<option value="">Selecione seu nome…</option>' + CONFIG.docentes.map(n=>`<option>${esc(n)}</option>`).join('') + '<option value="Secretaria PPGEAL" hidden>Secretaria PPGEAL</option>';
+
+  const anos = CONFIG.anos.map(a=>`<option value="${a}">${a}</option>`).join('');
+  $('#dAno').innerHTML = anos;
+  $('#dNome').addEventListener('change', e=>{ estado.docente.nome=e.target.value; salvar(); });
+  $('#dEmail').addEventListener('input', e=>{ estado.docente.email=e.target.value.trim(); salvar(); });
+  $('#dAno').addEventListener('change', e=>{ estado.ano=+e.target.value; salvar(); });
+}
+
+/* ---------- categorias ---------- */
+function statusCat(c){
+  const n = (estado.itens[c.id]||[]).length;
+  if(n) return {cls:'b-ok', txt: n===1 ? '1 item' : `${n} itens`};
+  if(estado.nada[c.id]) return {cls:'b-nada', txt:'Sem atividades'};
+  return {cls:'b-pend', txt:'Pendente'};
+}
+function renderCats(){
+  const cats = categoriasVisiveis();
+  $('#cats').innerHTML = cats.map(c=>{
+    const s = statusCat(c);
+    return `<button class="cat ${catAberta===c.id?'ativa':''}" data-cat="${c.id}">
+      <span class="t">${esc(c.titulo)}</span>
+      <span><span class="badge ${s.cls}">${s.txt}</span></span></button>`;
+  }).join('');
+  const resp = cats.filter(c=>statusCat(c).cls!=='b-pend').length;
+  $('#progresso').textContent = `${resp} de ${cats.length} categorias respondidas`;
+  document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>abrirCat(b.dataset.cat));
+}
+function abrirCat(id){
+  catAberta = id; editando = null; renderCats(); renderPainel();
+  $('#painelCat').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function resumoItem(c,it){
+  const [a,...r] = c.resumo;
+  const val = k => { const f=c.campos.find(x=>x.id===k); const v=it[k]; return f&&f.tipo==='date'?fmtData(v):v; };
+  return {tt: val(a) || '(sem título)', meta: r.map(val).filter(Boolean).join(' · ')};
+}
+function renderPainel(){
+  const c = CATEGORIAS.find(x=>x.id===catAberta); if(!c) return;
+  const itens = estado.itens[c.id] || [];
+  const p = $('#painelCat'); p.classList.remove('hidden');
+  p.innerHTML = `
+    <div class="row"><h2>${esc(c.titulo)}</h2><span class="spacer"></span>
+      ${c.quem==='secretaria'?'<span class="badge b-sec">Secretaria</span>':''}</div>
+    <p class="sub">${esc(c.desc)}</p>
+    ${c.id==='publicacoes'?'<div class="hint">Mantenha o Lattes atualizado: artigos e trabalhos em eventos são importados de lá para o Sucupira. Use este campo para registrar coautoria com discentes/egressos e com instituições estrangeiras.</div>':''}
+    ${itens.length ? '' : `<label class="nada"><input type="checkbox" id="chkNada" ${estado.nada[c.id]?'checked':''}> Não tive atividades nesta categoria em ${estado.ano}</label>`}
+    <div id="listaItens">${itens.map(it=>{ const r=resumoItem(c,it); return `
+      <div class="item"><div class="txt"><div class="tt">${esc(r.tt)}</div><div class="meta">${esc(r.meta)}</div></div>
+        <button class="ghost" data-ed="${it._id}">Editar</button>
+        <button class="ghost" data-dup="${it._id}" title="Duplicar">Duplicar</button>
+        <button class="ghost" style="color:var(--err)" data-rm="${it._id}">Remover</button></div>`; }).join('')}</div>
+    <div id="formArea"></div>
+    <div class="row" style="margin-top:10px" id="rowAdd"><button id="btnNovo">+ Adicionar ${itens.length?'outro':''} item</button></div>`;
+  const chk = $('#chkNada'); if(chk) chk.onchange = e=>{ estado.nada[c.id]=e.target.checked; salvar(); renderCats(); renderPainel(); };
+  $('#btnNovo').onclick = ()=>abrirForm(c, null);
+  p.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>abrirForm(c, b.dataset.ed));
+  p.querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>{
+    const o = itens.find(i=>i._id===b.dataset.dup); const n = {...o, _id:uid()};
+    itens.splice(itens.indexOf(o)+1, 0, n); salvar(); renderPainel(); abrirForm(c, n._id);
+  });
+  p.querySelectorAll('[data-rm]').forEach(b=>b.onclick=async()=>{
+    if(!await confirmar('Remover item', 'Este item será removido das suas respostas.')) return;
+    estado.itens[c.id] = itens.filter(i=>i._id!==b.dataset.rm); salvar(); renderCats(); renderPainel();
+  });
+  if(!itens.length && !estado.nada[c.id]) abrirForm(c, null);
+}
+function inputCampo(f, v){
+  const id = `f_${f.id}`, val = esc(v ?? '');
+  switch(f.tipo){
+    case 'textarea': return `<textarea id="${id}">${val}</textarea>`;
+    case 'select': return `<select id="${id}"><option value="">Selecione…</option>${f.opcoes.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+    case 'year': return `<select id="${id}"><option value="">—</option>${CONFIG.anos.map(a=>`<option ${String(a)===String(v??'')?'selected':''}>${a}</option>`).join('')}</select>`;
+    case 'number': return `<input id="${id}" type="number" step="${f.passo||'1'}" min="0" value="${val}">`;
+    case 'date': return `<input id="${id}" type="date" value="${val}">`;
+    case 'linha': {
+      const ops = [...(f.todas?['Todas as linhas']:[]), ...CONFIG.linhas.map(l=>l.nome)];
+      return `<select id="${id}" data-linha><option value="">Selecione…</option>${ops.map(o=>`<option ${o===v?'selected':''}>${esc(o)}</option>`).join('')}</select>`; }
+    case 'projetoPPG': return `<select id="${id}" data-projeto data-valor="${val}"></select>`;
+    default: return `<input id="${id}" type="text" value="${val}">`;
+  }
+}
+function abrirForm(c, id){
+  editando = id;
+  const it = id ? estado.itens[c.id].find(i=>i._id===id) : {};
+  const base = {...it};
+  if(!id){ c.campos.forEach(f=>{ if(f.tipo==='year') base[f.id]=estado.ano; }); }
+  $('#rowAdd').classList.add('hidden');
+  $('#formArea').innerHTML = `<div class="formbox">
+    <h3 style="margin-bottom:12px">${id?'Editar item':'Novo item'}</h3>
+    <div class="grid">${c.campos.map(f=>`<div class="f-${f.larg||'full'}">
+      <label for="f_${f.id}">${esc(f.label)} ${f.obrig?'<span class="req">*</span>':''}${f.ajuda?`<span class="help">${esc(f.ajuda)}</span>`:''}</label>
+      ${inputCampo(f, base[f.id])}</div>`).join('')}</div>
+    <div id="formErro"></div>
+    <div class="row" style="margin-top:14px"><button id="btnSalvarItem">${id?'Salvar alterações':'Adicionar item'}</button>
+      <button class="sec" id="btnCancelarItem">Cancelar</button></div></div>`;
+  $('#btnCancelarItem').onclick = ()=>{ editando=null; $('#formArea').innerHTML=''; $('#rowAdd').classList.remove('hidden'); };
+  $('#btnSalvarItem').onclick = ()=>salvarItem(c);
+  const selL = $('#formArea [data-linha]'), selP = $('#formArea [data-projeto]');
+  if(selP){
+    const preencher = ()=>{
+      const atual = selP.value || selP.dataset.valor; selP.dataset.valor = '';
+      const ls = CONFIG.linhas.filter(l=>!selL || !selL.value || l.nome===selL.value);
+      selP.innerHTML = `<option value="">${selL && !selL.value ? 'Escolha a linha primeiro…' : 'Selecione…'}</option>` +
+        ls.map(l=>`<optgroup label="${esc(l.nome)}">${l.projetos.map(pj=>`<option ${pj===atual?'selected':''}>${esc(pj)}</option>`).join('')}</optgroup>`).join('');
+    };
+    preencher(); if(selL) selL.addEventListener('change', preencher);
+  }
+  const first = $('#formArea').querySelector('input,select,textarea'); if(first && id) first.focus();
+}
+function salvarItem(c){
+  const novo = {}; const faltando = [];
+  c.campos.forEach(f=>{
+    const el = $(`#f_${f.id}`); let v = el.value.trim();
+    if(f.tipo==='doi' || f.id==='doi') v = v.replace(/^https?:\/\/(dx\.)?doi\.org\//i,'');
+    if((f.tipo==='number'||f.tipo==='year') && v!=='') v = Number(v);
+    el.classList.toggle('invalid', !!f.obrig && v==='');
+    if(f.obrig && v==='') faltando.push(f.label);
+    if(v!=='') novo[f.id] = v;
+  });
+  const ini = novo.inicio, fim = novo.fim;
+  if(ini && fim && fim < ini){ $('#formErro').innerHTML = `<div class="msg err">A data de fim é anterior à de início.</div>`; return; }
+  if(faltando.length){ $('#formErro').innerHTML = `<div class="msg err">Preencha: ${faltando.map(esc).join(', ')}.</div>`; return; }
+  const lista = estado.itens[c.id] ||= [];
+  if(editando){ const i = lista.findIndex(x=>x._id===editando); lista[i] = {_id:editando, ...novo}; }
+  else lista.push({_id:uid(), ...novo});
+  estado.nada[c.id] = false; editando = null; salvar(); renderCats(); renderPainel();
+  $('#formArea').innerHTML=''; $('#rowAdd').classList.remove('hidden');
+}
+
+/* ---------- diálogo ---------- */
+function confirmar(titulo, html, okTxt='OK', cancelar=true){
+  return new Promise(res=>{
+    const d = $('#dlg'); $('#dlgTitulo').textContent = titulo; $('#dlgCorpo').innerHTML = html;
+    $('#dlgOk').textContent = okTxt; $('#dlgCancelar').classList.toggle('hidden', !cancelar);
+    const fim = v => { d.close(); res(v); };
+    $('#dlgOk').onclick = ()=>fim(true); $('#dlgCancelar').onclick = ()=>fim(false);
+    d.oncancel = e=>{ e.preventDefault(); fim(false); };
+    if(d.showModal) d.showModal(); else res(true);
+  });
+}
+
+/* ---------- envio ---------- */
+function pacote(){
+  const cats = categoriasVisiveis();
+  return { formato:'ppgeal-sucupira', versao:1, origem: modo,
+    docente: estado.docente, ano: estado.ano, enviadoEm: new Date().toISOString(),
+    nada: Object.fromEntries(cats.map(c=>[c.id, !!estado.nada[c.id] && !(estado.itens[c.id]||[]).length])),
+    itens: Object.fromEntries(cats.map(c=>[c.id, (estado.itens[c.id]||[])])) };
+}
+function nomeArquivo(ext){ return `sucupira-${estado.ano}-${slug(estado.docente.nome)||'docente'}.${ext}`; }
+function baixar(nome, conteudo, tipo){
+  const blob = conteudo instanceof Blob ? conteudo : new Blob([conteudo], {type:tipo});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function atualizarStatusEnvio(){
+  if(!estado || modo==='admin') return;
+  const t = estado.enviadoEm ? `Enviado em ${new Date(estado.enviadoEm).toLocaleString('pt-BR')}` + (estado.alteradoEm>estado.enviadoEm ? ' · há alterações não enviadas' : '') : 'Ainda não enviado';
+  $('#statusEnvio').textContent = t;
+  $('#btnEnviar').textContent = CONFIG.endpoint ? (estado.enviadoEm?'Reenviar à secretaria':'Enviar à secretaria') : 'Gerar arquivo para a secretaria';
+}
+async function enviar(){
+  if(!estado.docente.nome || !/^\S+@\S+\.\S+$/.test(estado.docente.email)){
+    $('#dNome').classList.toggle('invalid', !estado.docente.nome);
+    $('#dEmail').classList.toggle('invalid', !/^\S+@\S+\.\S+$/.test(estado.docente.email));
+    window.scrollTo({top:0,behavior:'smooth'}); return;
+  }
+  const pend = categoriasVisiveis().filter(c=>statusCat(c).cls==='b-pend');
+  if(pend.length && !await confirmar('Há categorias pendentes',
+     `<p>Você ainda não respondeu: <b>${pend.map(c=>esc(c.titulo)).join(', ')}</b>.</p><p>Para cada uma, cadastre itens ou marque “Não tive atividades”. Deseja enviar mesmo assim? Você poderá completar e reenviar depois.</p>`, 'Enviar assim mesmo')) return;
+  const p = pacote();
+  if(!CONFIG.endpoint){
+    baixar(nomeArquivo('json'), JSON.stringify(p, null, 2), 'application/json');
+    estado.enviadoEm = p.enviadoEm; estado.alteradoEm = p.enviadoEm; store.set(chaveLocal(), estado); atualizarStatusEnvio();
+    await confirmar('Arquivo gerado', `<p>O arquivo <code>${esc(nomeArquivo('json'))}</code> foi baixado.</p><p>Envie-o por e-mail para <b>${esc(CONFIG.emailSecretaria)}</b>. Se precisar corrigir algo depois, edite aqui e gere um novo arquivo: o mais recente substitui o anterior.</p>`, 'Entendi', false);
+    return;
+  }
+  const btn = $('#btnEnviar'); btn.disabled = true; btn.textContent = 'Enviando…';
+  try{
+    const r = await fetch(CONFIG.endpoint, {method:'POST', body: JSON.stringify({acao:'enviar', pacote:p})});
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.erro || 'Falha no servidor');
+    estado.enviadoEm = p.enviadoEm; estado.alteradoEm = p.enviadoEm; store.set(chaveLocal(), estado);
+    await confirmar('Enviado', `<p>Suas respostas de ${p.ano} foram recebidas pela secretaria (${j.total} itens).</p><p>Você pode voltar a esta página neste mesmo navegador, alterar e reenviar: o novo envio substitui o anterior.</p>`, 'OK', false);
+  }catch(e){
+    await confirmar('Não foi possível enviar', `<p>${esc(e.message)}</p><p>Suas respostas continuam salvas neste navegador. Tente de novo ou use “Salvar cópia (.json)” e envie o arquivo para ${esc(CONFIG.emailSecretaria)}.</p>`, 'OK', false);
+  }finally{ btn.disabled = false; atualizarStatusEnvio(); }
+}
+
+/* ---------- Excel ---------- */
+function linhasCategoria(c, pacotes){
+  const cab = ['Docente','E-mail','Ano-base', ...c.campos.map(f=>f.label), 'ID'];
+  const linhas = [];
+  pacotes.forEach(p=> (p.itens[c.id]||[]).forEach(it=>{
+    linhas.push([p.docente.nome, p.docente.email, p.ano, ...c.campos.map(f=> f.tipo==='date' ? fmtData(it[f.id]) : (f.id==='doi' && it[f.id] ? 'https://doi.org/'+it[f.id] : (it[f.id] ?? ''))), it._id]);
+  }));
+  return [cab, ...linhas];
+}
+function montarXlsx(pacotes, comStatus){
+  if(typeof XLSX==='undefined'){ throw new Error('A biblioteca de Excel não carregou (sem internet?). Use o backup .json.'); }
+  const wb = XLSX.utils.book_new();
+  if(comStatus){
+    const cats = CATEGORIAS;
+    const cab = ['Docente','E-mail','Ano-base','Enviado em', ...cats.map(c=>c.titulo)];
+    const rows = pacotes.map(p=>[p.docente.nome,p.docente.email,p.ano,new Date(p.enviadoEm).toLocaleString('pt-BR'),
+      ...cats.map(c=>{ const n=(p.itens[c.id]||[]).length; return n ? n : (p.nada&&p.nada[c.id] ? 'sem atividades' : (c.id in p.itens ? 'não respondeu' : '')); })]);
+    const ws = XLSX.utils.aoa_to_sheet([cab, ...rows]); ws['!cols']=cab.map((_,i)=>({wch:i<2?28:14}));
+    XLSX.utils.book_append_sheet(wb, ws, 'Status');
+  }
+  CATEGORIAS.forEach(c=>{
+    const aoa = linhasCategoria(c, pacotes);
+    if(!comStatus && aoa.length===1) return;
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = aoa[0].map(h=>({wch: Math.min(48, Math.max(12, h.length+2))}));
+    ws['!autofilter'] = {ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:Math.max(aoa.length-1,0), c:aoa[0].length-1}})};
+    XLSX.utils.book_append_sheet(wb, ws, c.titulo.slice(0,31));
+  });
+  if(!wb.SheetNames.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Sem itens cadastrados']]), 'Vazio');
+  return wb;
+}
+
+/* ---------- ações da barra ---------- */
+function initBarra(){
+  $('#btnEnviar').onclick = enviar;
+  $('#btnBackup').onclick = ()=> baixar(nomeArquivo('json'), JSON.stringify(pacote(), null, 2), 'application/json');
+  $('#btnBaixarXlsxDoc').onclick = async ()=>{
+    try{ XLSX.writeFile(montarXlsx([pacote()], false), nomeArquivo('xlsx')); }
+    catch(e){ await confirmar('Erro', esc(e.message), 'OK', false); }
+  };
+  $('#arquivoRestaurar').onchange = async e=>{
+    const f = e.target.files[0]; e.target.value=''; if(!f) return;
+    try{
+      const p = JSON.parse(await f.text()); validarPacote(p);
+      if(!await confirmar('Abrir cópia', `<p>Substituir as respostas atuais por <b>${esc(p.docente.nome)} – ${p.ano}</b>?</p>`, 'Substituir')) return;
+      estado = {versao:1, docente:p.docente, ano:p.ano, itens:p.itens, nada:p.nada||{}, enviadoEm:null, alteradoEm:null};
+      salvar(); rotear();
+    }catch(err){ await confirmar('Arquivo inválido', esc(err.message), 'OK', false); }
+  };
+}
+function validarPacote(p){
+  if(!p || p.formato!=='ppgeal-sucupira' || !p.docente || !p.itens) throw new Error('Este arquivo não foi gerado por este formulário.');
+}
+
+/* =====================================================================
+   PAINEL DA SECRETARIA
+   ===================================================================== */
+let admin = null; // {pacotes:{chave:pacote}}
+function chavePacote(p){ return `${(p.docente.email||p.docente.nome).toLowerCase()}|${p.ano}|${p.origem||'docente'}`; }
+function iniciarAdmin(){
+  admin = store.get(LS_ADMIN) || {pacotes:{}};
+  $('#boxServidor').classList.toggle('hidden', !CONFIG.endpoint);
+  const anos = new Set([...CONFIG.anos]);
+  $('#filtroAno').innerHTML = `<option value="">Todos</option>` + [...anos].map(a=>`<option ${a===CONFIG.anoPadrao?'selected':''}>${a}</option>`).join('');
+  renderAdmin();
+}
+function adicionarPacotes(lista){
+  let novos=0, subst=0, ign=0;
+  lista.forEach(p=>{
+    const k = chavePacote(p), atual = admin.pacotes[k];
+    if(!atual){ admin.pacotes[k]=p; novos++; }
+    else if(p.enviadoEm >= atual.enviadoEm){ admin.pacotes[k]=p; subst++; }
+    else ign++;
+  });
+  store.set(LS_ADMIN, admin);
+  return `${novos} novo(s), ${subst} atualizado(s)` + (ign?`, ${ign} ignorado(s) por ser(em) mais antigo(s)`:'');
+}
+function pacotesFiltrados(){
+  const ano = $('#filtroAno').value;
+  return Object.values(admin.pacotes).filter(p=>!ano || String(p.ano)===ano)
+    .sort((a,b)=>a.docente.nome.localeCompare(b.docente.nome,'pt'));
+}
+function renderAdmin(){
+  const ps = pacotesFiltrados();
+  if(!ps.length){ $('#tabelaStatus').innerHTML = '<p class="sub" style="padding:14px">Nenhuma resposta carregada para este ano.</p>'; return; }
+  const cats = CATEGORIAS;
+  const tot = cats.map(c=>ps.reduce((s,p)=>s+(p.itens[c.id]||[]).length,0));
+  $('#tabelaStatus').innerHTML = `<table><thead><tr><th>Docente</th><th>Ano</th><th>Enviado em</th>${cats.map(c=>`<th>${esc(c.titulo)}</th>`).join('')}</tr></thead><tbody>
+    ${ps.map(p=>`<tr><td>${esc(p.docente.nome)}<br><span class="sub">${esc(p.docente.email)}</span></td><td>${p.ano}</td><td>${new Date(p.enviadoEm).toLocaleDateString('pt-BR')}</td>
+      ${cats.map(c=>{ const n=(p.itens[c.id]||[]).length; return `<td class="n">${n?`✔ ${n}`:(p.nada&&p.nada[c.id]?'—':'')}</td>`; }).join('')}</tr>`).join('')}
+    <tr><th>Total</th><th></th><th>${ps.length} resp.</th>${tot.map(t=>`<th class="n">${t}</th>`).join('')}</tr></tbody></table>`;
+}
+function msgAdmin(t, cls='info'){ $('#adminMsg').innerHTML = `<div class="msg ${cls}">${esc(t)}</div>`; }
+function initAdminUI(){
+  $('#filtroAno').onchange = renderAdmin;
+  $('#arquivosJson').onchange = async e=>{
+    const ok=[], erros=[];
+    for(const f of e.target.files){
+      try{
+        const d = JSON.parse(await f.text());
+        (Array.isArray(d) ? d : [d]).forEach(p=>{ validarPacote(p); ok.push(p); });
+      }catch(err){ erros.push(f.name); }
+    }
+    e.target.value='';
+    msgAdmin(adicionarPacotes(ok) + (erros.length?` · inválidos: ${erros.join(', ')}`:''), erros.length?'err':'ok');
+    renderAdmin();
+  };
+  $('#btnCarregarServidor').onclick = async ()=>{
+    const chave = $('#chaveAdmin').value.trim(); if(!chave) return msgAdmin('Informe a chave de administração.','err');
+    msgAdmin('Carregando…');
+    try{
+      const r = await fetch(`${CONFIG.endpoint}?acao=listar&chave=${encodeURIComponent(chave)}`);
+      const j = await r.json(); if(!j.ok) throw new Error(j.erro||'Falha');
+      msgAdmin('Servidor: ' + adicionarPacotes(j.pacotes), 'ok'); renderAdmin();
+    }catch(err){ msgAdmin('Erro ao carregar: ' + err.message, 'err'); }
+  };
+  $('#btnLimparAdmin').onclick = async ()=>{
+    if(!await confirmar('Limpar painel', '<p>Remove as respostas carregadas neste navegador (não apaga nada no servidor nem os arquivos).</p>', 'Limpar')) return;
+    admin = {pacotes:{}}; store.set(LS_ADMIN, admin); $('#adminMsg').innerHTML=''; renderAdmin();
+  };
+  $('#btnExportXlsx').onclick = ()=>{
+    const ps = pacotesFiltrados(); if(!ps.length) return msgAdmin('Nada para exportar.','err');
+    try{ XLSX.writeFile(montarXlsx(ps, true), `sucupira-ppgeal-consolidado-${$('#filtroAno').value||'todos'}.xlsx`); }
+    catch(e){ msgAdmin(e.message,'err'); }
+  };
+  $('#btnExportJsonAdmin').onclick = ()=>{
+    baixar(`sucupira-ppgeal-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(Object.values(admin.pacotes), null, 2), 'application/json');
+  };
+}
+
+/* ---------- início ---------- */
+initIdent(); initBarra(); initAdminUI();
+window.addEventListener('hashchange', rotear);
+rotear();
+</script>
+</body>
+</html>
