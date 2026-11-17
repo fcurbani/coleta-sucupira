@@ -17,10 +17,14 @@ const CONFIG = {
   anos: [2025, 2026, 2027, 2028, 2029],
   anoPadrao: 2026,
   prazo: '',                       // ex.: '15/02/2027' (aparece no topo; deixe '' para ocultar)
+  prazoLattes: 'xx/xx/20xx',       // data limite para os docentes atualizarem o Lattes (aviso no topo)
   emailSecretaria: 'ppgeal@contato.ufsc.br',   // confira o e-mail correto
   // URL do Google Apps Script publicado como "App da Web" (ver README).
   // Deixe '' para o modo sem servidor: o docente baixa um arquivo e envia por e-mail.
   endpoint: '',
+  // Senha da área da secretaria (#admin e #secretaria), guardada como hash SHA-256.
+  // Senha atual: ppgeal2026. Para trocar, gere o hash em https://emn178.github.io/online-tools/sha256.html
+  senhaSecretariaHash: '92b7f3a66998667bd494b0113f80d0c1c83425e3ff048750896b204e48556c4e',
   // Mostra "Docente Teste (simulação)" na lista de nomes. Mude para false antes de divulgar aos professores.
   modoTeste: true,
   // Lista de docentes para autocompletar (o docente também pode digitar outro nome)
@@ -124,6 +128,15 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .msg.ok{background:var(--ok-2);color:var(--ok)}
 .msg.err{background:#fdecea;color:var(--err)}
 .msg.info{background:var(--pri-2);color:var(--pri)}
+.aviso{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:720px){.aviso{grid-template-columns:1fr}}
+.aviso .bloco{border-radius:8px;padding:14px 16px}
+.aviso .proposito{background:var(--pri-2);border-left:4px solid var(--marca)}
+.aviso .lattes{background:var(--warn-2);border-left:4px solid var(--broto)}
+.aviso h3{margin:0 0 6px;font-size:1rem}
+.aviso .proposito h3{color:var(--pri)} .aviso .lattes h3{color:var(--warn)}
+.aviso a{color:var(--pri);font-weight:600}
+.aviso p{margin:0 0 6px;font-size:.92rem} .aviso p:last-child{margin-bottom:0}
 .hint{background:var(--warn-2);border-left:4px solid var(--broto);color:var(--warn);padding:10px 14px;border-radius:8px;font-size:.9rem;margin-bottom:12px}
 .stick{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 24px;z-index:5}
 table{border-collapse:collapse;width:100%;font-size:.88rem}
@@ -156,6 +169,18 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
 <main class="wrap">
   <!-- ================= VISÃO DOCENTE ================= -->
   <section id="viewDocente">
+    <div class="card aviso" id="cardAviso">
+      <div class="bloco proposito">
+        <h3>Para que serve esta página</h3>
+        <p>Ela reúne, num só lugar, as informações que o PPGEAL precisa todo ano para preencher a Plataforma Sucupira da CAPES: missões, solidariedade, eventos, palestras, patentes, extensão, comitês, projetos, convênios, disciplinas, egressos e produtos em destaque.</p>
+        <p>Substitui as planilhas separadas que eram enviadas para cada atividade. Você preenche uma vez por ano-base, pode salvar e voltar depois, e envia tudo de uma vez para a secretaria.</p>
+      </div>
+      <div class="bloco lattes">
+        <h3>Atualize seu Currículo Lattes até <span id="dataLattes"></span></h3>
+        <p>Artigos, trabalhos em eventos, livros, capítulos, orientações e bancas são importados <b>diretamente do Lattes</b> para o Sucupira. Por isso eles não precisam ser cadastrados aqui.</p>
+        <p>Nesta página, registre apenas o que o Lattes não informa (por exemplo, coautoria com discentes/egressos e com instituições estrangeiras). <a href="https://lattes.cnpq.br/" target="_blank" rel="noopener">Acessar a Plataforma Lattes</a></p>
+      </div>
+    </div>
     <div class="card">
       <h2>1. Identificação</h2>
       <p class="sub" id="introTxt">Preencha uma vez. Suas respostas ficam salvas neste navegador até você enviar e podem ser editadas e reenviadas depois.</p>
@@ -178,6 +203,20 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
     </div>
 
     <div class="card hidden" id="painelCat"></div>
+  </section>
+
+  <!-- ================= SENHA ================= -->
+  <section id="viewSenha" class="hidden">
+    <div class="card" style="max-width:420px;margin:40px auto">
+      <h2>Área da secretaria</h2>
+      <p class="sub">Digite a senha para continuar.</p>
+      <form id="formSenha" class="row">
+        <input id="campoSenha" type="password" autocomplete="current-password" style="flex:1" aria-label="Senha">
+        <button type="submit">Entrar</button>
+      </form>
+      <div id="erroSenha"></div>
+      <p class="sub" style="margin-top:14px"><a href="#">Voltar ao formulário do docente</a></p>
+    </div>
   </section>
 
   <!-- ================= VISÃO SECRETARIA ================= -->
@@ -441,9 +480,21 @@ function chaveLocal(){ return LS_KEY + (modo==='secretaria' ? '-sec' : ''); }
 function salvar(){ estado.alteradoEm = new Date().toISOString(); store.set(chaveLocal(), estado); atualizarStatusEnvio(); }
 
 /* ---------- roteamento ---------- */
+async function sha256(t){
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function liberado(){ try{ return sessionStorage.getItem('ppgeal-sec')===CONFIG.senhaSecretariaHash; }catch(e){ return window._sec===true; } }
 function rotear(){
   const h = location.hash.replace('#','');
   modo = h==='admin' ? 'admin' : h==='secretaria' ? 'secretaria' : 'docente';
+  const pedeSenha = modo!=='docente' && CONFIG.senhaSecretariaHash && !liberado();
+  $('#viewSenha').classList.toggle('hidden', !pedeSenha);
+  if(pedeSenha){
+    ['#viewDocente','#viewAdmin','#barraEnvio'].forEach(x=>$(x).classList.add('hidden'));
+    $('#modoLink').innerHTML = ''; $('#campoSenha').value=''; $('#erroSenha').innerHTML='';
+    setTimeout(()=>$('#campoSenha').focus(), 50); return;
+  }
   $('#viewDocente').classList.toggle('hidden', modo==='admin');
   $('#viewAdmin').classList.toggle('hidden', modo!=='admin');
   $('#barraEnvio').classList.toggle('hidden', modo==='admin');
@@ -457,6 +508,7 @@ function rotear(){
   $('#introTxt').textContent = modo==='secretaria'
     ? 'Lançamentos feitos pela secretaria. Ao terminar, baixe o arquivo .json (ou envie, se houver servidor) para entrar no consolidado.'
     : 'Preencha uma vez. Suas respostas ficam salvas neste navegador até você enviar e podem ser editadas e reenviadas depois.';
+  $('#cardAviso').classList.toggle('hidden', modo==='secretaria');
   $('#dNome').value = estado.docente.nome; $('#dEmail').value = estado.docente.email; $('#dAno').value = estado.ano;
   catAberta = null; editando = null;
   renderCats(); $('#painelCat').classList.add('hidden'); atualizarStatusEnvio();
@@ -465,6 +517,7 @@ function rotear(){
 /* ---------- identificação ---------- */
 function initIdent(){
   $('#progName').textContent = `Área de concentração: ${CONFIG.areaConcentracao} · Quadriênio ${CONFIG.quadrienio}` + (CONFIG.prazo ? ` · Prazo: ${CONFIG.prazo}` : '');
+  $('#dataLattes').textContent = CONFIG.prazoLattes || 'o prazo informado pela secretaria';
   $('#listaDocentes').innerHTML = CONFIG.docentes.map(n=>`<option value="${esc(n)}">`).join('');
   $('#dNome').innerHTML = '<option value="">Selecione seu nome…</option>' + CONFIG.docentes.map(n=>`<option>${esc(n)}</option>`).join('') + (CONFIG.modoTeste ? '<option>Docente Teste (simulação)</option>' : '') + '<option value="Secretaria PPGEAL" hidden>Secretaria PPGEAL</option>';
 
@@ -788,6 +841,13 @@ function initAdminUI(){
 
 /* ---------- início ---------- */
 initIdent(); initBarra(); initAdminUI();
+$('#formSenha').addEventListener('submit', async e=>{
+  e.preventDefault();
+  if(await sha256($('#campoSenha').value) === CONFIG.senhaSecretariaHash){
+    try{ sessionStorage.setItem('ppgeal-sec', CONFIG.senhaSecretariaHash); }catch(err){ window._sec = true; }
+    rotear();
+  } else { $('#erroSenha').innerHTML = '<div class="msg err">Senha incorreta.</div>'; $('#campoSenha').select(); }
+});
 window.addEventListener('hashchange', rotear);
 rotear();
 </script>
