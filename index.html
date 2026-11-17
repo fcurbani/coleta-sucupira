@@ -81,7 +81,18 @@ header.top p{margin:2px 0 0;color:var(--mute);font-size:.88rem;max-width:560px}
 header.top .modo{font-size:.88rem;font-weight:600}
 header.top a{color:var(--pri)}
 .faixa{height:5px;background:linear-gradient(90deg,var(--marca) 0%,var(--marca) 55%,var(--salvia) 78%,var(--broto) 100%)}
-@media (max-width:720px){header.top .titulo{border-left:none;padding-left:0} header.top .marca{flex-wrap:wrap}}
+@media (max-width:720px){
+  header.top{padding:10px 16px 0} header.top .wrap{padding-bottom:8px;gap:6px}
+  header.top .marca{flex-wrap:wrap;gap:6px} header.top .marca img.ppgeal{height:34px}
+  header.top img.ufsc{display:none} header.top .titulo{border-left:none;padding-left:0}
+  header.top h1{font-size:1.1rem} header.top p{font-size:.8rem}
+  main{padding:14px 12px 40px} .card{padding:16px}
+  .stick{position:static!important;padding:12px 16px!important}
+  .stick label{text-align:center}
+  .stick .wrap{flex-direction:column;align-items:stretch}
+  .stick .spacer{display:none}
+  #btnEnviar{order:-2;padding:12px} #statusEnvio{order:-1;text-align:center}
+}
 .wrap{max-width:1080px;margin:0 auto}
 main{padding:20px 24px 80px}
 .card{background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px rgba(14,130,173,.05);border-radius:var(--radius);padding:20px;margin-bottom:16px}
@@ -258,7 +269,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
     <button class="sec" id="btnBaixarXlsxDoc">Baixar minhas respostas (Excel)</button>
     <button class="ghost" id="btnBackup">Salvar cópia (.json)</button>
     <label class="ghost" style="margin:0;font-weight:600;color:var(--pri);cursor:pointer;padding:6px 8px">Abrir cópia…
-      <input type="file" id="arquivoRestaurar" accept=".json" class="hidden"></label>
+      <input type="file" id="arquivoRestaurar" class="hidden"></label>
     <span class="spacer"></span>
     <span id="statusEnvio" class="sub" style="margin:0"></span>
     <button id="btnEnviar">Enviar à secretaria</button>
@@ -474,7 +485,44 @@ let estado = null;           // rascunho do docente
 let catAberta = null;
 let editando = null;         // _id do item em edição
 
-function estadoVazio(){ return {versao:1, docente:{nome:'',email:''}, ano:CONFIG.anoPadrao, itens:{}, nada:{}, enviadoEm:null, alteradoEm:null}; }
+function estadoVazio(){ return {versao:2, docente:{nome:'',email:''}, ano:CONFIG.anoPadrao, porAno:{}}; }
+/* Um rascunho por ano-base: estado.itens/nada/enviadoEm/alteradoEm apontam sempre para o ano selecionado */
+function montarEstado(raw){
+  raw.porAno ||= {};
+  if(raw.itens){ // migra rascunhos da versão 1 (um ano só)
+    raw.porAno[raw.ano] = {itens:raw.itens, nada:raw.nada||{}, enviadoEm:raw.enviadoEm||null, alteradoEm:raw.alteradoEm||null};
+    ['itens','nada','enviadoEm','alteradoEm'].forEach(k=>delete raw[k]);
+  }
+  raw.versao = 2;
+  const doAno = () => (raw.porAno[raw.ano] ||= {itens:{}, nada:{}, enviadoEm:null, alteradoEm:null});
+  ['itens','nada','enviadoEm','alteradoEm'].forEach(k=>Object.defineProperty(raw, k,
+    {get(){ return doAno()[k]; }, set(v){ doAno()[k] = v; }, enumerable:false, configurable:true}));
+  return raw;
+}
+/* Categorias cujos itens podem continuar valendo no ano seguinte */
+const CONTINUAM = ['projetos','convenios','solidariedade','comites','extensao'];
+function anoVazio(a){ const d = estado.porAno[a]; return !d || (!Object.values(d.itens||{}).some(l=>l.length) && !Object.values(d.nada||{}).some(Boolean)); }
+async function trocarAno(novo){
+  estado.ano = novo;
+  if(anoVazio(novo)){
+    const anteriores = Object.keys(estado.porAno).map(Number).filter(a=>a<novo && !anoVazio(a)).sort((a,b)=>b-a);
+    if(anteriores.length){
+      const de = anteriores[0], src = estado.porAno[de].itens, limite = `${novo}-01-01`;
+      const copiar = {};
+      CONTINUAM.forEach(c=>{ const l=(src[c]||[]).filter(it=>!it.fim || it.fim>=limite); if(l.length) copiar[c]=l; });
+      const n = Object.values(copiar).reduce((t,l)=>t+l.length,0);
+      if(n){
+        const nomes = Object.keys(copiar).map(c=>CATEGORIAS.find(x=>x.id===c).titulo).join(', ');
+        if(await confirmar(`Começar ${novo} a partir de ${de}?`,
+          `<p>Encontrei <b>${n} item(ns)</b> de ${de} que ainda estão vigentes em ${novo} (${esc(nomes)}).</p><p>Deseja trazê-los para ${novo}? Você poderá editar ou remover cada um. As demais categorias começam vazias.</p>`,
+          'Trazer itens', true)){
+          Object.entries(copiar).forEach(([c,l])=>{ estado.itens[c] = l.map(it=>({...it, _id:uid()})); });
+        }
+      }
+    }
+  }
+  store.set(chaveLocal(), estado); rotear();
+}
 function categoriasVisiveis(){ return CATEGORIAS.filter(c => modo==='secretaria' ? c.quem==='secretaria' : c.quem==='docente'); }
 function chaveLocal(){ return LS_KEY + (modo==='secretaria' ? '-sec' : ''); }
 function salvar(){ estado.alteradoEm = new Date().toISOString(); store.set(chaveLocal(), estado); atualizarStatusEnvio(); }
@@ -502,7 +550,7 @@ function rotear(){
     ? `<a href="#admin">Área da secretaria</a>`
     : `<a href="#">Voltar ao formulário do docente</a>${modo==='secretaria'?' · <a href="#admin">Painel</a>':''}`;
   if(modo==='admin'){ iniciarAdmin(); return; }
-  estado = store.get(chaveLocal()) || estadoVazio();
+  estado = montarEstado(store.get(chaveLocal()) || estadoVazio());
   estado.itens ||= {}; estado.nada ||= {};
   if(modo==='secretaria' && !estado.docente.nome){ estado.docente.nome='Secretaria PPGEAL'; }
   $('#introTxt').textContent = modo==='secretaria'
@@ -525,7 +573,7 @@ function initIdent(){
   $('#dAno').innerHTML = anos;
   $('#dNome').addEventListener('change', e=>{ estado.docente.nome=e.target.value; salvar(); });
   $('#dEmail').addEventListener('input', e=>{ estado.docente.email=e.target.value.trim(); salvar(); });
-  $('#dAno').addEventListener('change', e=>{ estado.ano=+e.target.value; salvar(); });
+  $('#dAno').addEventListener('change', e=>trocarAno(+e.target.value));
 }
 
 /* ---------- categorias ---------- */
@@ -677,7 +725,7 @@ function baixar(nome, conteudo, tipo){
 }
 function atualizarStatusEnvio(){
   if(!estado || modo==='admin') return;
-  const t = estado.enviadoEm ? `Enviado em ${new Date(estado.enviadoEm).toLocaleString('pt-BR')}` + (estado.alteradoEm>estado.enviadoEm ? ' · há alterações não enviadas' : '') : 'Ainda não enviado';
+  const t = estado.enviadoEm ? `${estado.ano}: enviado em ${new Date(estado.enviadoEm).toLocaleString('pt-BR')}` + (estado.alteradoEm>estado.enviadoEm ? ' · há alterações não enviadas' : '') : `${estado.ano}: ainda não enviado`;
   $('#statusEnvio').textContent = t;
   $('#btnEnviar').textContent = CONFIG.endpoint ? (estado.enviadoEm?'Reenviar à secretaria':'Enviar à secretaria') : 'Gerar arquivo para a secretaria';
 }
@@ -753,8 +801,9 @@ function initBarra(){
     const f = e.target.files[0]; e.target.value=''; if(!f) return;
     try{
       const p = JSON.parse(await f.text()); validarPacote(p);
-      if(!await confirmar('Abrir cópia', `<p>Substituir as respostas atuais por <b>${esc(p.docente.nome)} – ${p.ano}</b>?</p>`, 'Substituir')) return;
-      estado = {versao:1, docente:p.docente, ano:p.ano, itens:p.itens, nada:p.nada||{}, enviadoEm:null, alteradoEm:null};
+      if(!await confirmar('Abrir cópia', `<p>Carregar a cópia de <b>${esc(p.docente.nome)} – ${p.ano}</b>? Ela substitui o que estiver preenchido para ${p.ano} neste navegador; os outros anos não mudam.</p>`, 'Carregar')) return;
+      estado.docente = p.docente; estado.ano = p.ano;
+      estado.porAno[p.ano] = {itens:p.itens, nada:p.nada||{}, enviadoEm:null, alteradoEm:null};
       salvar(); rotear();
     }catch(err){ await confirmar('Arquivo inválido', esc(err.message), 'OK', false); }
   };
