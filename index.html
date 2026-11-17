@@ -308,14 +308,16 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <h2>Como baixar os currículos Lattes e a exportação do Web of Science</h2>
 
       <h3>1. Currículos Lattes (publicações e patentes)</h3>
+      <p>A página pública do Lattes não oferece mais o download em XML. O caminho é salvar a própria página do currículo:</p>
       <ol>
-        <li>Abra o currículo do docente: <code>lattes.cnpq.br/</code> seguido do ID Lattes, ou pela <a href="https://buscatextual.cnpq.br/buscatextual/busca.do" target="_blank" rel="noopener">busca textual</a>.</li>
-        <li>No canto superior direito do currículo, clique no botão <b>XML</b>.</li>
-        <li>Resolva o código de verificação (captcha). O navegador baixa um arquivo <code>.zip</code> com o número do ID Lattes no nome.</li>
-        <li>Repita para cada docente. Não precisa descompactar: a página lê o <code>.zip</code> direto.</li>
-        <li>No painel, em <b>Currículos Lattes</b>, selecione todos os arquivos de uma vez.</li>
+        <li>Abra o currículo do docente: <code>lattes.cnpq.br/</code> seguido do ID Lattes, ou pela <a href="https://buscatextual.cnpq.br/buscatextual/busca.do" target="_blank" rel="noopener">busca textual</a>. Resolva o código de verificação (captcha), se aparecer.</li>
+        <li>Com o currículo aberto, aperte <b>Ctrl+S</b> (no Mac, <b>Cmd+S</b>).</li>
+        <li>Em <b>Tipo</b>, escolha <b>Página da Web, somente HTML</b>. Salve numa pasta, por exemplo “Lattes 2026”. O nome do arquivo já vem com o nome do docente.</li>
+        <li>Repita para cada docente.</li>
+        <li>No painel, em <b>Currículos Lattes</b>, selecione todos os arquivos <code>.html</code> de uma vez.</li>
       </ol>
-      <p>A tabela mostra a data da última atualização de cada currículo. Com o prazo definido em <code>prazoLattes</code>, o Excel indica quem atualizou dentro do prazo. Baixe os currículos <b>depois</b> desse prazo.</p>
+      <p>Se algum docente enviar o XML do próprio currículo (ou um <code>.zip</code> com ele), a página também aceita.</p>
+      <p>A tabela mostra a data da última atualização de cada currículo. Com o prazo definido em <code>prazoLattes</code>, o Excel indica quem atualizou dentro do prazo. Salve os currículos <b>depois</b> desse prazo.</p>
 
       <h3>2. Web of Science (publicações)</h3>
       <ol>
@@ -383,7 +385,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <p class="sub">Importe aqui os currículos Lattes (para publicações e patentes) e a exportação do Web of Science. Eles entram como abas extras no Excel consolidado, filtrados pelo ano-base escolhido acima. <a href="#leia-me-secretaria">Como baixar esses arquivos →</a></p>
       <div class="grid">
         <div class="f-half">
-          <label>Currículos Lattes <span class="help">Arquivos .zip ou .xml baixados no botão XML de cada currículo. Pode selecionar vários.</span></label>
+          <label>Currículos Lattes <span class="help">Página do currículo salva com Ctrl+S (.html). Também aceita .xml ou .zip. Pode selecionar vários.</span></label>
           <input id="arquivosLattes" type="file" multiple>
         </div>
         <div class="f-half">
@@ -1042,7 +1044,7 @@ function decodificar(buf){
   if(b[0]===0xFF && b[1]===0xFE) return new TextDecoder('utf-16le').decode(b);
   if(b[0]===0xFE && b[1]===0xFF) return new TextDecoder('utf-16be').decode(b);
   const ini = new TextDecoder('latin1').decode(b.slice(0,200));
-  const m = /encoding=["']([\w-]+)["']/i.exec(ini);
+  const m = /encoding=["']([\w-]+)["']/i.exec(ini) || /charset=["']?([\w-]+)/i.exec(new TextDecoder('latin1').decode(b.slice(0,3000)));
   return new TextDecoder(m ? m[1] : 'utf-8').decode(b);
 }
 async function xmlsDoArquivo(f){
@@ -1050,7 +1052,7 @@ async function xmlsDoArquivo(f){
   if(/\.zip$/i.test(f.name) || (new Uint8Array(buf)[0]===0x50 && new Uint8Array(buf)[1]===0x4B)){
     if(typeof JSZip==='undefined') throw new Error('biblioteca de ZIP não carregou');
     const z = await JSZip.loadAsync(buf); const out = [];
-    for(const e of Object.values(z.files)) if(!e.dir && /\.xml$/i.test(e.name)) out.push({nome:`${f.name}/${e.name}`, texto:decodificar(await e.async('arraybuffer'))});
+    for(const e of Object.values(z.files)) if(!e.dir && /\.(xml|html?)$/i.test(e.name)) out.push({nome:`${f.name}/${e.name}`, texto:decodificar(await e.async('arraybuffer'))});
     return out;
   }
   return [{nome:f.name, texto:decodificar(buf)}];
@@ -1102,6 +1104,79 @@ function lerLattes(texto, arquivo){
   r.producoes = r.producoes.filter(p=>!p.ano || p.ano>=min);
   r.patentes = r.patentes.filter(p=>[p.ano, anoDeDataLattes(p.deposito), anoDeDataLattes(p.concessao)].some(a=>!a || a>=min));
   return r;
+}
+
+/* Página pública do currículo salva no navegador (Ctrl+S → "Página da Web, somente HTML") */
+function lerLattesHTML(doc, arquivo){
+  const txt = n => (n ? n.textContent : '').replace(/\s+/g,' ').trim();
+  const corpo = txt(doc.body);
+  const tit = /Lattes \((.+)\)\s*$/.exec(doc.title||'');
+  const nome = (tit && tit[1]) || txt(doc.querySelector('h2.nome')) || '';
+  const id = (/ID Lattes:\s*(\d{16})/.exec(corpo)||[])[1] || (/lattes\.cnpq\.br\/(\d{16})/.exec(corpo)||[])[1] || nome;
+  const at = (/Última atualização do currículo em (\d{2})\/(\d{2})\/(\d{4})/.exec(corpo));
+  if(!nome || !/Lattes/i.test(doc.title||'') || !/ID Lattes/.test(corpo)) throw new Error('não é uma página de currículo Lattes');
+  const r = {id, nome, docente: (typeof docenteCanonico==='function' ? docenteCanonico(nome) : nome), atualizado: at ? at[1]+at[2]+at[3] : '', arquivo, producoes:[], patentes:[]};
+  // percorre o documento em ordem, guardando a seção (h1) e a subseção (div.inst_back / b) atuais
+  let top='', anc='', sub='';
+  const SECOES = new Set(['ArtigosCompletos','LivrosCapitulos','TrabalhosPublicadosAnaisCongresso']);
+  const anoDe = t => { const m = t.match(/\b(19|20)\d{2}\b/g); return m ? +m[m.length-1] : null; };
+  const separar = t => { const i = t.indexOf(' . '); return i>0 ? [t.slice(0,i).trim(), t.slice(i+3).trim()] : ['', t]; };
+  const walker = doc.createTreeWalker(doc.body, 1);
+  let el; const vistos = new Set();
+  while((el = walker.nextNode())){
+    if(el.tagName==='A' && el.getAttribute('name')){
+      if(el.querySelector('h1')){ top = el.getAttribute('name'); anc=''; sub=''; } else anc = el.getAttribute('name');
+      continue;
+    }
+    if(el.classList && (el.classList.contains('inst_back') || el.classList.contains('cita-artigos'))){ sub = txt(el); continue; }
+    if(!(el.tagName==='SPAN' && el.classList.contains('transform'))) continue;
+    const cel = el.closest('.layout-cell-11'); if(!cel) continue;
+    if(top==='PatentesRegistros'){
+      const t = txt(el), [autores, resto] = separar(t);
+      const g = (re) => (re.exec(t)||[])[1] || '';
+      const ano = +g(/\.\s*((?:19|20)\d{2}),\s*[^.]*\.\s*(?:Patente|Programa|Desenho|Marca|Cultivar|Topografia)/) || anoDe(resto);
+      const tituloReg = g(/título:\s*"([^"]+)"/);
+      const k = 'p:'+(g(/Número do registro:\s*([^,]+),/)||tituloReg||resto.slice(0,80)); if(vistos.has(k)) continue; vistos.add(k);
+      const natureza = g(/Patente:\s*([^.]+)\./);
+      r.patentes.push({tipo: natureza ? `Patente – ${natureza}` : (sub||'Registro'), titulo: tituloReg || resto.split(/\.\s*(?:19|20)\d{2},/)[0].replace(/\.$/,''),
+        ano, codigo: g(/Número do registro:\s*([^,]+),/), deposito: g(/Depósito:\s*(\d{2}\/\d{2}\/\d{4})/).replace(/\//g,''), concessao: g(/Concessão:\s*(\d{2}\/\d{2}\/\d{4})/).replace(/\//g,''),
+        instituicao: g(/Instituição de registro:\s*([^.;]+)/), depositante:'', pais: g(/(?:19|20)\d{2},\s*([A-Za-zÀ-ú ]+)\.\s*(?:<br>)?\s*(?:Patente|Programa|Desenho|Marca|Cultivar)/), inventores: autores, referencia: t});
+      continue;
+    }
+    if(top!=='ProducoesCientificas' || !SECOES.has(anc)) continue;
+    const tipoSec = anc;
+    const art = el.closest('.artigo-completo');
+    let tipo, titulo='', veiculo='', doi='', ano=null;
+    const clone = el.cloneNode(true); clone.querySelectorAll('.informacao-artigo, .citado, sup').forEach(x=>x.remove());
+    const t = txt(clone), [autores, resto] = separar(t);
+    const doiA = el.querySelector('a.icone-doi'); if(doiA) doi = (doiA.getAttribute('href')||'').replace(/^https?:\/\/(dx\.)?doi\.org\//i,'').trim().split(/\s+/)[0].toLowerCase();
+    if(tipoSec==='ArtigosCompletos'){
+      if(!art) continue;
+      tipo = 'Artigo em periódico';
+      const cit = el.querySelector('.citado'); const uri = cit ? (cit.getAttribute('cvuri')||'') : '';
+      const prm = n => { const m = new RegExp('[?&]'+n+'=([^&]*)').exec(uri); return m ? m[1].trim() : ''; };
+      titulo = prm('titulo'); veiculo = prm('nomePeriodico');
+      ano = +(txt(el.querySelector('.informacao-artigo[data-tipo-ordenacao="ano"]'))) || anoDe(resto);
+    } else if(tipoSec==='LivrosCapitulos'){
+      tipo = /cap[ií]tulo/i.test(sub) ? 'Capítulo de livro' : 'Livro';
+      ano = anoDe(resto);
+      const m = /In:\s*.*?\.\s*\(Org[^)]*\)\.\s*([^.]+)\./.exec(resto); if(m) veiculo = m[1].trim();
+    } else if(tipoSec==='TrabalhosPublicadosAnaisCongresso'){
+      tipo = /resumo/i.test(sub) ? (/expandido/i.test(sub) ? 'Resumo expandido em anais' : 'Resumo em anais') : 'Trabalho completo em anais';
+      const m = /In:\s*([^,]+),/.exec(resto); if(m) veiculo = m[1].trim();
+      ano = anoDe((resto.split('In:')[1]||resto).slice(0,200)) || anoDe(resto);
+    } else continue;
+    if(!titulo) titulo = resto.split(/\.\s(?=[A-ZÀ-Ú0-9])/)[0].replace(/\.$/,'');
+    const k = 'b:'+(doi || (titulo.toLowerCase()+'|'+ano)); if(vistos.has(k)) continue; vistos.add(k);
+    r.producoes.push({tipo, titulo, ano, veiculo, doi, autores, referencia: t});
+  }
+  return r;
+}
+
+function lerLattesQualquer(texto, arquivo){
+  if(/<CURRICULO-VITAE[\s>]/.test(texto)) return lerLattes(texto, arquivo);
+  if(/<html/i.test(texto)) return lerLattesHTML(new DOMParser().parseFromString(texto, 'text/html'), arquivo);
+  throw new Error('não é um currículo Lattes (.html ou .xml)');
 }
 
 /* ---------- Web of Science ---------- */
@@ -1215,7 +1290,7 @@ function initFontesUI(){
   $('#arquivosLattes').onchange = async e=>{
     const ok=[], erros=[];
     for(const f of e.target.files){
-      try{ for(const x of await xmlsDoArquivo(f)){ try{ ok.push(lerLattes(x.texto, x.nome)); }catch(err){ erros.push(`${x.nome} (${err.message})`); } } }
+      try{ for(const x of await xmlsDoArquivo(f)){ try{ ok.push(lerLattesQualquer(x.texto, x.nome)); }catch(err){ erros.push(`${x.nome} (${err.message})`); } } }
       catch(err){ erros.push(`${f.name} (${err.message})`); }
     }
     e.target.value='';
