@@ -148,6 +148,8 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .aviso .proposito h3{color:var(--pri)} .aviso .lattes h3{color:var(--warn)}
 .aviso a{color:var(--pri);font-weight:600}
 .aviso p{margin:0 0 6px;font-size:.92rem} .aviso p:last-child{margin-bottom:0}
+.ajuda a{color:var(--pri);font-weight:600} .ajuda h3{margin:22px 0 6px;color:var(--pri)} .ajuda p,.ajuda li{font-size:.95rem} .ajuda ol{padding-left:22px}
+.ajuda table{margin:8px 0 10px} .ajuda td,.ajuda th{font-size:.9rem}
 .hint{background:var(--warn-2);border-left:4px solid var(--broto);color:var(--warn);padding:10px 14px;border-radius:8px;font-size:.9rem;margin-bottom:12px}
 .stick{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 24px;z-index:5}
 table{border-collapse:collapse;width:100%;font-size:.88rem}
@@ -185,6 +187,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
         <h3>Para que serve esta página</h3>
         <p>Ela reúne, num só lugar, as informações que o PPGEAL precisa todo ano para preencher a Plataforma Sucupira da CAPES: missões, solidariedade, eventos, palestras, patentes, extensão, comitês, projetos, convênios, disciplinas, egressos e produtos em destaque.</p>
         <p>Substitui as planilhas separadas que eram enviadas para cada atividade. Você preenche uma vez por ano-base, pode salvar e voltar depois, e envia tudo de uma vez para a secretaria.</p>
+        <p><a href="#leia-me">Leia-me: como preencher, onde seus dados ficam salvos e como fazer cópia de segurança →</a></p>
       </div>
       <div class="bloco lattes">
         <h3>Atualize seu Currículo Lattes até <span id="dataLattes"></span></h3>
@@ -214,6 +217,64 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
     </div>
 
     <div class="card hidden" id="painelCat"></div>
+  </section>
+
+  <!-- ================= LEIA-ME ================= -->
+  <section id="viewAjuda" class="hidden">
+    <div class="card ajuda">
+      <p><a href="#">← Voltar ao formulário</a></p>
+      <h2>Leia-me: como usar esta página</h2>
+      <p>Esta página substitui as planilhas que o PPGEAL enviava para cada atividade do Sucupira. Você preenche tudo num só lugar, uma vez por ano-base, e envia de uma vez para a secretaria.</p>
+
+      <h3>Como preencher</h3>
+      <ol>
+        <li>Atualize seu Currículo Lattes até a data indicada no topo da página. Artigos, trabalhos em eventos, livros, orientações e bancas vêm do Lattes e não precisam ser cadastrados aqui.</li>
+        <li>Escolha seu nome, informe seu e-mail e o ano-base.</li>
+        <li>Clique em cada categoria e cadastre suas atividades. Se não teve nenhuma, marque “Não tive atividades nesta categoria”.</li>
+        <li>Quando todas as categorias mostrarem selo verde (itens) ou cinza (sem atividades), clique em <b>Gerar arquivo para a secretaria</b>.</li>
+        <li>Envie o arquivo <code>.json</code> baixado para <b class="emailSec"></b>.</li>
+      </ol>
+      <p>Uma atividade com vários docentes do PPGEAL (um evento, uma ação de extensão) pode ser cadastrada só pelo(a) coordenador(a).</p>
+
+      <h3>Onde seus dados ficam salvos</h3>
+      <p>O que você digita fica salvo automaticamente <b>somente no navegador e no aparelho em que você preencheu</b>. Não há login: a página não guarda seu rascunho na internet.</p>
+      <table>
+        <tr><th>Situação</th><th>Seus dados aparecem?</th></tr>
+        <tr><td>Mesmo computador e mesmo navegador, mesmo depois de fechar e reabrir</td><td>Sim</td></tr>
+        <tr><td>Outro navegador (por exemplo, Chrome → Edge)</td><td>Não</td></tr>
+        <tr><td>Outro computador, tablet ou celular</td><td>Não</td></tr>
+        <tr><td>Janela anônima ou privada</td><td>Não (e o que for digitado nela se perde ao fechar)</td></tr>
+        <tr><td>Depois de limpar o histórico ou os dados de navegação</td><td>Não, o rascunho é apagado</td></tr>
+      </table>
+      <p>Depois que você envia o arquivo, a secretaria já tem tudo. Perder o rascunho só atrapalha se quiser corrigir algo depois, e a cópia de segurança resolve isso.</p>
+
+      <h3>Cópia de segurança (.json)</h3>
+      <p><b>Para salvar:</b> na barra de botões, clique em <b>Salvar cópia (.json)</b>. O navegador baixa um arquivo como <code>sucupira-2026-seu-nome.json</code>. Guarde-o num lugar seguro: e-mail para você mesmo, Google Drive, OneDrive ou pen drive.</p>
+      <p><b>Para abrir em outro aparelho:</b> abra a página, clique em <b>Abrir cópia…</b>, escolha o arquivo e confirme. Os dados daquele ano-base aparecem preenchidos e você continua de onde parou.</p>
+      <p><b>Quando salvar:</b> sempre que interromper o preenchimento e puder continuar em outro aparelho, e antes de limpar o histórico do navegador. O arquivo gerado para a secretaria também serve como cópia: guarde-o.</p>
+      <p>Abrir uma cópia substitui apenas o ano-base daquela cópia. Não edite o arquivo <code>.json</code> à mão.</p>
+
+      <h3>Ano-base: um rascunho para cada ano</h3>
+      <p>Trocar o ano-base não apaga nada: você pode voltar ao ano anterior e tudo estará como deixou. Um ano novo começa vazio, mas se o ano anterior tiver itens ainda vigentes, a página pergunta se você quer trazê-los.</p>
+      <table>
+        <tr><th>Categoria</th><th>No ano novo</th></tr>
+        <tr><td>Projetos de pesquisa, Convênios, Solidariedade institucional, Ações de extensão</td><td>Oferece trazer os itens sem data de fim ou com fim no ano novo ou depois</td></tr>
+        <tr><td>Comitês e representações</td><td>Oferece trazer todos</td></tr>
+        <tr><td>Publicações, Missões, Eventos, Palestras, Patentes, Cursos de extensão, Produtos em destaque, Disciplinas, Egressos</td><td>Começam vazias</td></tr>
+      </table>
+      <p>Isso só funciona no mesmo navegador do ano anterior. Em outro aparelho, abra antes a cópia <code>.json</code> do ano anterior e depois troque o ano-base.</p>
+
+      <h3>Perguntas frequentes</h3>
+      <p><b>Já enviei e preciso corrigir.</b> Abra a página no mesmo navegador (ou abra sua cópia), corrija e gere o arquivo de novo. O envio mais recente substitui o anterior.</p>
+      <p><b>Abri a página e está tudo vazio.</b> Você provavelmente está em outro navegador, aparelho ou janela anônima. Use <b>Abrir cópia…</b>.</p>
+      <p><b>Posso usar no celular ou tablet?</b> Sim. O arquivo baixado vai para Downloads (no iPhone/iPad, no app Arquivos). O rascunho do celular não aparece no computador: use a cópia <code>.json</code>.</p>
+      <p><b>Tenho um comprovante?</b> Clique em <b>Baixar minhas respostas (Excel)</b>.</p>
+      <p><b>Meu nome não está na lista.</b> Avise a secretaria.</p>
+
+      <h3>Contato</h3>
+      <p>Secretaria do PPGEAL – <b class="emailSec"></b> – (48) 3721-4063</p>
+      <p><a href="#">← Voltar ao formulário</a></p>
+    </div>
   </section>
 
   <!-- ================= SENHA ================= -->
@@ -535,6 +596,13 @@ async function sha256(t){
 function liberado(){ try{ return sessionStorage.getItem('ppgeal-sec')===CONFIG.senhaSecretariaHash; }catch(e){ return window._sec===true; } }
 function rotear(){
   const h = location.hash.replace('#','');
+  if(h==='leia-me'){
+    ['#viewDocente','#viewAdmin','#barraEnvio','#viewSenha'].forEach(x=>$(x).classList.add('hidden'));
+    $('#viewAjuda').classList.remove('hidden');
+    $('#modoLink').innerHTML = `<a href="#">Voltar ao formulário</a>`;
+    window.scrollTo(0,0); return;
+  }
+  $('#viewAjuda').classList.add('hidden');
   modo = h==='admin' ? 'admin' : h==='secretaria' ? 'secretaria' : 'docente';
   const pedeSenha = modo!=='docente' && CONFIG.senhaSecretariaHash && !liberado();
   $('#viewSenha').classList.toggle('hidden', !pedeSenha);
@@ -547,7 +615,7 @@ function rotear(){
   $('#viewAdmin').classList.toggle('hidden', modo!=='admin');
   $('#barraEnvio').classList.toggle('hidden', modo==='admin');
   $('#modoLink').innerHTML = modo==='docente'
-    ? `<a href="#admin">Área da secretaria</a>`
+    ? `<a href="#leia-me">Leia-me: como usar</a> · <a href="#admin" style="font-weight:400">Área da secretaria</a>`
     : `<a href="#">Voltar ao formulário do docente</a>${modo==='secretaria'?' · <a href="#admin">Painel</a>':''}`;
   if(modo==='admin'){ iniciarAdmin(); return; }
   estado = montarEstado(store.get(chaveLocal()) || estadoVazio());
@@ -565,6 +633,7 @@ function rotear(){
 /* ---------- identificação ---------- */
 function initIdent(){
   $('#progName').textContent = `Área de concentração: ${CONFIG.areaConcentracao} · Quadriênio ${CONFIG.quadrienio}` + (CONFIG.prazo ? ` · Prazo: ${CONFIG.prazo}` : '');
+  document.querySelectorAll('.emailSec').forEach(e=>e.textContent = CONFIG.emailSecretaria);
   $('#dataLattes').textContent = CONFIG.prazoLattes || 'o prazo informado pela secretaria';
   $('#listaDocentes').innerHTML = CONFIG.docentes.map(n=>`<option value="${esc(n)}">`).join('');
   $('#dNome').innerHTML = '<option value="">Selecione seu nome…</option>' + CONFIG.docentes.map(n=>`<option>${esc(n)}</option>`).join('') + (CONFIG.modoTeste ? '<option>Docente Teste (simulação)</option>' : '') + '<option value="Secretaria PPGEAL" hidden>Secretaria PPGEAL</option>';
