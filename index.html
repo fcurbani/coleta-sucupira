@@ -306,9 +306,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <div class="grid">
         <div class="f-half"><label for="dNome">Nome do(a) docente <span class="req">*</span></label>
           <select id="dNome"></select></div>
-        <div class="f-third"><label for="dEmail">E-mail <span class="req">*</span></label>
-          <input id="dEmail" type="email" autocomplete="email"></div>
-        <div class="f-third" style="grid-column:span 1"><label for="dAno">Ano-base <span class="req">*</span></label>
+        <div class="f-third"><label for="dAno">Ano-base <span class="req">*</span></label>
           <select id="dAno"></select></div>
       </div>
       <datalist id="listaDocentes"></datalist>
@@ -334,10 +332,10 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <h3>Como preencher</h3>
       <ol>
         <li>Atualize seu Currículo Lattes até a data indicada no topo da página e mantenha em dia seus perfis ResearcherID/ORCID. A secretaria busca direto da fonte: publicações (Web of Science e Lattes), patentes (Lattes), projetos de pesquisa (SIGPEX/UFSC) e disciplinas, orientações e bancas do PPGEAL. Essas informações não são cadastradas aqui.</li>
-        <li>Escolha seu nome, informe seu e-mail e o ano-base.</li>
+        <li>Escolha seu nome e o ano-base.</li>
         <li>Clique em cada categoria e cadastre suas atividades. Se não teve nenhuma, marque “Não tive atividades nesta categoria”.</li>
         <li>Quando todas as categorias mostrarem selo verde (itens) ou cinza (sem atividades), clique em <b>Gerar arquivo para a secretaria</b>.</li>
-        <li>Envie o arquivo <code>.json</code> baixado para <b class="emailSec"></b>.</li>
+        <li>Envie o arquivo <code>.json</code> baixado para <b class="emailSec"></b>. A página oferece um botão que abre seu e-mail já endereçado à secretaria; basta anexar o arquivo.</li>
       </ol>
       <p>Uma atividade com vários docentes do PPGEAL (um evento, uma ação de extensão) pode ser cadastrada só pelo(a) coordenador(a).</p>
       <p>Quer ver como fica? Abra o <a href="#exemplo">exemplo preenchido</a>, um docente fictício com uma atividade em cada categoria.</p>
@@ -732,7 +730,7 @@ let estado = null;           // rascunho do docente
 let catAberta = null;
 let editando = null;         // _id do item em edição
 
-function estadoVazio(){ return {versao:2, docente:{nome:'',email:''}, ano:CONFIG.anoPadrao, porAno:{}}; }
+function estadoVazio(){ return {versao:2, docente:{nome:''}, ano:CONFIG.anoPadrao, porAno:{}}; }
 /* Um rascunho por ano-base: estado.itens/nada/enviadoEm/alteradoEm apontam sempre para o ano selecionado */
 function montarEstado(raw){
   raw.porAno ||= {};
@@ -826,7 +824,7 @@ function rotear(){
     : (store.get(chaveLocal()) || estadoVazio()));
   const ex = modo==='exemplo';
   $('#cardExemplo').classList.toggle('hidden', !ex);
-  ['#dNome','#dEmail','#dAno'].forEach(x=>$(x).disabled = ex);
+  ['#dNome','#dAno'].forEach(x=>$(x).disabled = ex);
   ['#btnEnviar','#btnBackup','#lblRestaurar','#statusEnvio'].forEach(x=>$(x).classList.toggle('hidden', ex));
   $('#btnBaixarXlsxDoc').textContent = ex ? 'Ver o exemplo em Excel' : 'Baixar minhas respostas (Excel)';
   estado.itens ||= {}; estado.nada ||= {};
@@ -835,7 +833,7 @@ function rotear(){
     ? 'Lançamentos feitos pela secretaria. Ao terminar, baixe o arquivo .json (ou envie, se houver servidor) para entrar no consolidado.'
     : 'Preencha uma vez. Suas respostas ficam salvas neste navegador até você enviar e podem ser editadas e reenviadas depois.';
   $('#cardAviso').classList.toggle('hidden', modo!=='docente');
-  $('#dNome').value = estado.docente.nome; $('#dEmail').value = estado.docente.email; $('#dAno').value = estado.ano;
+  $('#dNome').value = estado.docente.nome; $('#dAno').value = estado.ano;
   catAberta = null; editando = null;
   renderCats(); $('#painelCat').classList.add('hidden'); atualizarStatusEnvio();
 }
@@ -850,8 +848,7 @@ function initIdent(){
 
   const anos = CONFIG.anos.map(a=>`<option value="${a}">${a}</option>`).join('');
   $('#dAno').innerHTML = anos;
-  $('#dNome').addEventListener('change', e=>{ estado.docente.nome=e.target.value; salvar(); });
-  $('#dEmail').addEventListener('input', e=>{ estado.docente.email=e.target.value.trim(); salvar(); });
+  $('#dNome').addEventListener('change', e=>{ estado.docente.nome=e.target.value; e.target.classList.remove('invalid'); salvar(); });
   $('#dAno').addEventListener('change', e=>trocarAno(+e.target.value));
 }
 
@@ -1012,9 +1009,8 @@ function atualizarStatusEnvio(){
   $('#btnEnviar').textContent = CONFIG.endpoint ? (estado.enviadoEm?'Reenviar à secretaria':'Enviar à secretaria') : 'Gerar arquivo para a secretaria';
 }
 async function enviar(){
-  if(!estado.docente.nome || !/^\S+@\S+\.\S+$/.test(estado.docente.email)){
-    $('#dNome').classList.toggle('invalid', !estado.docente.nome);
-    $('#dEmail').classList.toggle('invalid', !/^\S+@\S+\.\S+$/.test(estado.docente.email));
+  if(!estado.docente.nome){
+    $('#dNome').classList.add('invalid');
     window.scrollTo({top:0,behavior:'smooth'}); return;
   }
   const pend = categoriasVisiveis().filter(c=>statusCat(c).cls==='b-pend');
@@ -1024,7 +1020,14 @@ async function enviar(){
   if(!CONFIG.endpoint){
     baixar(nomeArquivo('json'), JSON.stringify(p, null, 2), 'application/json');
     estado.enviadoEm = p.enviadoEm; estado.alteradoEm = p.enviadoEm; store.set(chaveLocal(), estado); atualizarStatusEnvio();
-    await confirmar('Arquivo gerado', `<p>O arquivo <code>${esc(nomeArquivo('json'))}</code> foi baixado.</p><p>Envie-o por e-mail para <b>${esc(CONFIG.emailSecretaria)}</b>. Se precisar corrigir algo depois, edite aqui e gere um novo arquivo: o mais recente substitui o anterior.</p>`, 'Entendi', false);
+    const assunto = `Coleta Sucupira ${p.ano} – ${p.docente.nome}`;
+    const corpo = `Olá,\n\nSegue em anexo o arquivo da coleta Sucupira do ano-base ${p.ano} (${nomeArquivo('json')}).\n\nAtenciosamente,\n${p.docente.nome}`;
+    const mailto = `mailto:${CONFIG.emailSecretaria}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+    await confirmar('Arquivo gerado', `<p>O arquivo <code>${esc(nomeArquivo('json'))}</code> foi baixado (pasta Downloads).</p>
+      <p><b>Último passo:</b> envie esse arquivo para <b>${esc(CONFIG.emailSecretaria)}</b>.</p>
+      <p><a href="${mailto}"><button type="button">Abrir e-mail para a secretaria</button></a></p>
+      <p class="sub">O botão abre seu programa de e-mail já com destinatário, assunto e texto. Só falta <b>anexar o arquivo</b> (o navegador não permite anexar sozinho). Se o botão não abrir nada, escreva para o endereço acima pelo Gmail/Outlook e anexe o arquivo.</p>
+      <p class="sub">Se precisar corrigir algo depois, edite aqui e gere um novo arquivo: o mais recente substitui o anterior.</p>`, 'Fechar', false);
     return;
   }
   const btn = $('#btnEnviar'); btn.disabled = true; btn.textContent = 'Enviando…';
@@ -1041,10 +1044,10 @@ async function enviar(){
 
 /* ---------- Excel ---------- */
 function linhasCategoria(c, pacotes){
-  const cab = ['Docente','E-mail','Ano-base', ...c.campos.map(f=>f.label), 'ID'];
+  const cab = ['Docente','Ano-base', ...c.campos.map(f=>f.label), 'ID'];
   const linhas = [];
   pacotes.forEach(p=> (p.itens[c.id]||[]).forEach(it=>{
-    linhas.push([p.docente.nome, p.docente.email, p.ano, ...c.campos.map(f=> f.tipo==='date' ? fmtData(it[f.id]) : (f.id==='doi' && it[f.id] ? 'https://doi.org/'+it[f.id] : (it[f.id] ?? ''))), it._id]);
+    linhas.push([p.docente.nome, p.ano, ...c.campos.map(f=> f.tipo==='date' ? fmtData(it[f.id]) : (f.id==='doi' && it[f.id] ? 'https://doi.org/'+it[f.id] : (it[f.id] ?? ''))), it._id]);
   }));
   return [cab, ...linhas];
 }
@@ -1053,10 +1056,10 @@ function montarXlsx(pacotes, comStatus){
   const wb = XLSX.utils.book_new();
   if(comStatus){
     const cats = CATEGORIAS;
-    const cab = ['Docente','E-mail','Ano-base','Enviado em', ...cats.map(c=>c.titulo)];
-    const rows = pacotes.map(p=>[p.docente.nome,p.docente.email,p.ano,new Date(p.enviadoEm).toLocaleString('pt-BR'),
+    const cab = ['Docente','Ano-base','Enviado em', ...cats.map(c=>c.titulo)];
+    const rows = pacotes.map(p=>[p.docente.nome,p.ano,new Date(p.enviadoEm).toLocaleString('pt-BR'),
       ...cats.map(c=>{ const n=(p.itens[c.id]||[]).length; return n ? n : (p.nada&&p.nada[c.id] ? 'sem atividades' : (c.id in p.itens ? 'não respondeu' : '')); })]);
-    const ws = XLSX.utils.aoa_to_sheet([cab, ...rows]); ws['!cols']=cab.map((_,i)=>({wch:i<2?28:14}));
+    const ws = XLSX.utils.aoa_to_sheet([cab, ...rows]); ws['!cols']=cab.map((_,i)=>({wch:i<1?32:14}));
     XLSX.utils.book_append_sheet(wb, ws, 'Status');
   }
   CATEGORIAS.forEach(c=>{
@@ -1099,7 +1102,7 @@ function validarPacote(p){
    PAINEL DA SECRETARIA
    ===================================================================== */
 let admin = null; // {pacotes:{chave:pacote}}
-function chavePacote(p){ return `${(p.docente.email||p.docente.nome).toLowerCase()}|${p.ano}|${p.origem||'docente'}`; }
+function chavePacote(p){ return `${norm(p.docente.nome)}|${p.ano}|${p.origem||'docente'}`; }
 function iniciarAdmin(){
   admin = store.get(LS_ADMIN) || {pacotes:{}};
   $('#boxServidor').classList.toggle('hidden', !CONFIG.endpoint);
@@ -1130,7 +1133,7 @@ function renderAdmin(){
   const cats = CATEGORIAS;
   const tot = cats.map(c=>ps.reduce((s,p)=>s+(p.itens[c.id]||[]).length,0));
   $('#tabelaStatus').innerHTML = `<table><thead><tr><th>Docente</th><th>Ano</th><th>Enviado em</th>${cats.map(c=>`<th>${esc(c.titulo)}</th>`).join('')}</tr></thead><tbody>
-    ${ps.map(p=>`<tr><td>${esc(p.docente.nome)}<br><span class="sub">${esc(p.docente.email)}</span></td><td>${p.ano}</td><td>${new Date(p.enviadoEm).toLocaleDateString('pt-BR')}</td>
+    ${ps.map(p=>`<tr><td>${esc(p.docente.nome)}</td><td>${p.ano}</td><td>${new Date(p.enviadoEm).toLocaleDateString('pt-BR')}</td>
       ${cats.map(c=>{ const n=(p.itens[c.id]||[]).length; return `<td class="n">${n?`✔ ${n}`:(p.nada&&p.nada[c.id]?'—':'')}</td>`; }).join('')}</tr>`).join('')}
     <tr><th>Total</th><th></th><th>${ps.length} resp.</th>${tot.map(t=>`<th class="n">${t}</th>`).join('')}</tr></tbody></table>`;
 }
