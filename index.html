@@ -212,6 +212,36 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .evo-anos{display:flex;gap:6px;margin-top:4px}
 .evo-anos span{flex:1;text-align:center;font-size:.75rem;color:var(--mute)}
 .evo-nota{font-size:.75rem;color:var(--mute);margin-top:4px}
+.dash-total{border-top:1px solid #C5D3DA;padding-top:6px;margin-top:3px;font-weight:700}
+.dash-total .dash-tot{color:var(--ink)}
+.dash-tdet{font-size:.78rem;font-weight:400;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rel{padding:28px 34px}
+.rel-capa{border-bottom:3px solid var(--marca);padding-bottom:14px;margin-bottom:8px}
+.rel-capa h1{color:var(--marca);font-size:1.5rem;margin:12px 0 4px}
+.rel-capa p{margin:2px 0}
+.rel-h2{color:var(--marca);font-size:1.2rem;margin:26px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.rel-h3{font-size:1rem;margin:18px 0 6px;color:var(--ink)}
+.rel-tab{border-collapse:collapse;width:100%;font-size:.82rem;margin-bottom:6px}
+.rel-tab th{background:var(--pri-2);color:var(--pri);text-align:left;padding:5px 7px;position:static}
+.rel-tab td{border-bottom:1px solid var(--line);padding:4px 7px;vertical-align:top}
+.rel-tab tr{break-inside:avoid}
+.rel-dash .dash-box,.rel-dash .kpi,.rel-dash .evo-box{break-inside:avoid}
+.rel-rodape{margin-top:24px}
+@media print{
+  @page{size:A4;margin:14mm 12mm}
+  body{background:#fff;font-size:12px}
+  header.top,.faixa,.noprint,.stick,#viewAdmin,.dash-tip{display:none!important}
+  main{padding:0}
+  .card.rel{border:none;box-shadow:none;padding:0}
+  .rel-quebra{break-before:page}
+  .rel-h2{break-after:avoid} .rel-h3{break-after:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .rel .kpis{grid-template-columns:repeat(4,1fr)}
+  .rel .kpi-v{font-size:1.5rem}
+  .rel .dash-row,.rel .dash-larga .dash-row{grid-template-columns:120px 1fr 28px}
+  .rel .evo-grid{grid-template-columns:repeat(4,1fr)}
+}
 .dash-tip{position:fixed;display:none;z-index:50;background:#1F2A33;color:#fff;font-size:.8rem;padding:5px 8px;border-radius:6px;pointer-events:none;max-width:320px}
 .hint{background:var(--warn-2);border-left:4px solid var(--broto);color:var(--warn);padding:10px 14px;border-radius:8px;font-size:.9rem;margin-bottom:12px}
 .stick{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 24px;z-index:5}
@@ -303,7 +333,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
 
       <h3>Como preencher</h3>
       <ol>
-        <li>Atualize seu Currículo Lattes até a data indicada no topo da página. Publicações (Web of Science e Lattes), patentes (Lattes), projetos de pesquisa (SIGPEX), orientações, bancas e disciplinas do PPGEAL são coletados pela secretaria e não são cadastrados aqui.</li>
+        <li>Atualize seu Currículo Lattes até a data indicada no topo da página e mantenha em dia seus perfis ResearcherID/ORCID. A secretaria busca direto da fonte: publicações (Web of Science e Lattes), patentes (Lattes), projetos de pesquisa (SIGPEX/UFSC) e disciplinas, orientações e bancas do PPGEAL. Essas informações não são cadastradas aqui.</li>
         <li>Escolha seu nome, informe seu e-mail e o ano-base.</li>
         <li>Clique em cada categoria e cadastre suas atividades. Se não teve nenhuma, marque “Não tive atividades nesta categoria”.</li>
         <li>Quando todas as categorias mostrarem selo verde (itens) ou cinza (sem atividades), clique em <b>Gerar arquivo para a secretaria</b>.</li>
@@ -353,11 +383,33 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
     </div>
   </section>
 
+  <!-- ================= RELATÓRIO ================= -->
+  <section id="viewRelatorio" class="hidden">
+    <div class="card noprint row" style="position:sticky;top:0;z-index:6">
+      <b>Relatório anual</b>
+      <label for="relAno" style="margin:0">Ano-base</label><select id="relAno" style="width:auto"></select>
+      <span class="spacer"></span>
+      <a href="#admin"><button class="sec" type="button">Voltar ao painel</button></a>
+      <button id="btnImprimirRel" type="button">Imprimir / salvar em PDF</button>
+    </div>
+    <div class="card rel" id="relCorpo"></div>
+  </section>
+
   <!-- ================= GUIA DA SECRETARIA ================= -->
   <section id="viewGuiaSec" class="hidden">
     <div class="card ajuda">
       <p><a href="#admin">← Voltar ao painel da secretaria</a></p>
-      <h2>Como baixar os currículos Lattes e a exportação do Web of Science</h2>
+      <h2>Guia da secretaria: ciclo anual da coleta Sucupira</h2>
+
+      <h3>Visão geral</h3>
+      <p>Todo o trabalho acontece no painel da secretaria (<code>#admin</code>). Comece escolhendo o <b>Ano-base</b> no topo do painel: tudo o que vem depois segue esse ano.</p>
+      <ol>
+        <li><b>Formulários dos docentes</b>: importe os arquivos <code>.json</code> que os professores enviarem por e-mail (pode selecionar vários; o envio mais recente de cada um substitui o anterior).</li>
+        <li><b>Planilhas do CAPG</b>: Ingressantes, Concluintes, Regulares e Disciplinas oferecidas (item 3 abaixo).</li>
+        <li><b>Currículos Lattes</b>: página salva com Ctrl+S, em HTML (item 1 abaixo).</li>
+        <li><b>Web of Science</b>: consulta pronta → exportação em Excel (item 2 abaixo).</li>
+        <li><b>Resultado</b>: confira o <b>dashboard</b>, exporte o <b>Excel consolidado</b> e gere o <b>relatório</b> (item 4 abaixo).</li>
+      </ol>
 
       <h3>1. Currículos Lattes (publicações e patentes)</h3>
       <p>A página pública do Lattes não oferece mais o download em XML. O caminho é salvar a própria página do currículo:</p>
@@ -385,9 +437,27 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <p>Gere no CAPG as planilhas <b>Ingressantes</b>, <b>Concluintes</b> e <b>Regulares</b> (Informações Adicionais) e <b>Disciplinas oferecidas</b> do ano. No painel, selecione todas de uma vez no quadro <b>Planilhas do CAPG</b>. A página reconhece qual é qual pelas colunas e guarda só o necessário para o Sucupira, sem CPF, nascimento, raça, deficiência ou e-mail.</p>
       <p>Não salve essas planilhas no GitHub: elas têm dados pessoais dos alunos.</p>
 
-      <h3>4. Gerar o Excel</h3>
-      <p>Escolha o ano-base no painel e clique em <b>Exportar Excel consolidado</b>. Além das abas dos docentes, aparecem: <b>Lattes – atualização</b>, <b>Publicações (Lattes)</b>, <b>Patentes (Lattes)</b> e <b>Publicações (WoS)</b>. Publicações repetidas entre docentes coautores aparecem uma vez só, com todos os nomes. A coluna “Também no WoS?” cruza o Lattes com o WoS pelo DOI.</p>
-      <p>Os arquivos importados ficam guardados só neste navegador. Para recomeçar, use <b>Limpar fontes externas</b>.</p>
+      <h3>4. Dashboard, Excel consolidado e relatório</h3>
+      <p><b>Dashboard</b> (quadro “Indicadores do programa”): números do ano, gráficos por docente, linha de pesquisa e bolsa, e a evolução no quadriênio quando houver dados de 2 anos ou mais.</p>
+      <p><b>Excel consolidado</b>: abas de cada categoria do formulário dos docentes; do CAPG (Discentes ativos, Ingressantes, Titulados, Pós-doutorandos, Disciplinas oferecidas e por código); do Lattes (Lattes – atualização, Publicações, Patentes) e do WoS (Publicações). Publicações de docentes coautores aparecem uma vez só, com todos os nomes; a coluna “Também no WoS?” cruza Lattes e WoS pelo DOI.</p>
+      <p><b>Relatório</b>: botão <b>Gerar relatório do ano</b> → <b>Imprimir / salvar em PDF</b> → escolha “Salvar como PDF”. Traz indicadores, corpo discente, disciplinas, produção, atividades dos docentes e a situação da coleta.</p>
+
+      <h3>5. Onde ficam os dados e como guardar</h3>
+      <ul>
+        <li>Tudo o que é importado fica <b>só neste navegador</b>, neste computador. Nada vai para a internet.</li>
+        <li>Guarde os <b>arquivos de origem</b> numa pasta do ano (ex.: “Sucupira 2026”): os .json dos docentes, as planilhas do CAPG, os HTML do Lattes e o arquivo do WoS. Se o navegador for limpo ou você trocar de computador, basta reimportar a pasta.</li>
+        <li>O botão <b>Backup .json</b> salva só as respostas dos docentes (não o CAPG, o Lattes e o WoS).</li>
+        <li>Os três botões de limpar são independentes: <b>Limpar</b> (respostas dos docentes), <b>Limpar planilhas do CAPG</b> e <b>Limpar fontes externas</b> (Lattes e WoS).</li>
+        <li><b>Nunca</b> suba esses arquivos ao GitHub: no repositório fica só o <code>index.html</code>.</li>
+      </ul>
+
+      <h3>6. Antes de divulgar aos professores (a cada ano)</h3>
+      <ul>
+        <li>No topo do <code>index.html</code> (bloco <code>CONFIG</code>): atualize <code>prazoLattes</code> e <code>anoPadrao</code>; deixe <code>modoTeste: false</code>.</li>
+        <li>Mudou o corpo docente? Atualize <code>docentes</code> e <code>identificadores</code> (Lattes, ORCID, ResearcherID, Google Acadêmico).</li>
+        <li>Envie o <code>index.html</code> ao GitHub (Add file → Upload files) e confira a página com Ctrl+F5.</li>
+        <li>Use <b>Sair (bloquear)</b> no painel quando deixar o computador.</li>
+      </ul>
       <p><a href="#admin">← Voltar ao painel da secretaria</a></p>
     </div>
   </section>
@@ -409,7 +479,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
   <!-- ================= VISÃO SECRETARIA ================= -->
   <section id="viewAdmin" class="hidden">
     <div class="card">
-      <div class="row"><h2>Painel da secretaria</h2><span class="spacer"></span><button class="sec" id="btnSairSec" type="button">Sair (bloquear)</button></div>
+      <div class="row"><h2>Painel da secretaria</h2><span class="spacer"></span><a href="#leia-me-secretaria" style="font-weight:600;color:var(--pri)">Guia da secretaria</a><button class="sec" id="btnSairSec" type="button">Sair (bloquear)</button></div>
       <p class="sub">Junte as respostas dos docentes e exporte uma planilha consolidada, com uma aba por categoria.</p>
       <div class="row" style="margin-bottom:10px">
         <div id="boxServidor" class="row hidden">
@@ -427,6 +497,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
         <label for="filtroAno" style="margin:0">Ano-base</label>
         <select id="filtroAno" style="width:auto"></select>
         <span class="spacer"></span>
+        <button class="sec" id="btnRelatorio" type="button">Gerar relatório do ano</button>
         <button id="btnExportXlsx">Exportar Excel consolidado</button>
         <button class="sec" id="btnExportJsonAdmin">Backup .json</button>
       </div>
@@ -450,7 +521,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
     </div>
     <div class="card" id="cardFontes">
       <h2>Fontes externas: Lattes e Web of Science</h2>
-      <p class="sub">Importe aqui os currículos Lattes (para publicações e patentes) e a exportação do Web of Science. Eles entram como abas extras no Excel consolidado, filtrados pelo ano-base escolhido acima. <a href="#leia-me-secretaria">Como baixar esses arquivos →</a></p>
+      <p class="sub">Importe aqui os currículos Lattes (para publicações e patentes) e a exportação do Web of Science. Eles entram como abas extras no Excel consolidado, filtrados pelo ano-base escolhido acima. <a href="#leia-me-secretaria">Guia da secretaria: como baixar esses arquivos →</a></p>
       <div class="grid">
         <div class="f-half">
           <label>Currículos Lattes <span class="help">Página do currículo salva com Ctrl+S (.html). Também aceita .xml ou .zip. Pode selecionar vários.</span></label>
@@ -711,7 +782,16 @@ async function sha256(t){
 function liberado(){ try{ return sessionStorage.getItem('ppgeal-sec')===CONFIG.senhaSecretariaHash; }catch(e){ return window._sec===true; } }
 function rotear(){
   const h = location.hash.replace('#','');
-  $('#viewGuiaSec').classList.add('hidden');
+  $('#viewGuiaSec').classList.add('hidden'); $('#viewRelatorio').classList.add('hidden');
+  const mRel = /^relatorio-(\d{4})$/.exec(h);
+  if(mRel){
+    if(CONFIG.senhaSecretariaHash && !liberado()){ location.hash = 'admin'; return; }
+    ['#viewDocente','#viewAdmin','#barraEnvio','#viewSenha','#viewAjuda'].forEach(x=>$(x).classList.add('hidden'));
+    modo = 'admin'; iniciarAdmin(); gerarRelatorio(+mRel[1]);
+    $('#viewRelatorio').classList.remove('hidden');
+    $('#modoLink').innerHTML = `<a href="#admin">Voltar ao painel</a>`;
+    window.scrollTo(0,0); return;
+  }
   if(h==='leia-me-secretaria'){
     ['#viewDocente','#viewAdmin','#barraEnvio','#viewSenha','#viewAjuda'].forEach(x=>$(x).classList.add('hidden'));
     $('#viewGuiaSec').classList.remove('hidden');
@@ -1508,10 +1588,14 @@ function renderCapg(){
   const d = capg(), linhas = [];
   Object.keys(CAPG_TIPOS).forEach(t=>Object.entries(d[t]||{}).sort().forEach(([ano,l])=>{
     const n = re => l.filter(r=>re.test(r['Nível']||'')).length;
-    linhas.push(`<tr><td>${esc(CAPG_TIPOS[t].nome)}</td><td>${ano||'?'}</td><td class="n">${l.length}</td>
-      <td class="n">${t==='disciplinas' ? new Set(l.map(r=>r['Código'])).size+' disc.' : n(/^mestrado/i)}</td><td class="n">${t==='disciplinas' ? '' : n(/^doutorado/i)}</td><td class="n">${t==='disciplinas' ? '' : n(/p[oó]s-?doutorado/i)}</td></tr>`);
+    if(t==='disciplinas'){
+      linhas.push(`<tr><td>${esc(CAPG_TIPOS[t].nome)}</td><td>${ano||'?'}</td><td class="n" colspan="3">${new Set(l.map(r=>r['Código'])).size} disciplinas · ${l.length} turmas (${n(/^me|^mestrado/i)} ME, ${n(/^do|^doutorado/i)} DO)</td><td class="n"><b>${new Set(l.map(r=>r['Código'])).size}</b></td></tr>`);
+    } else {
+      const m = n(/^mestrado/i), dd = n(/^doutorado/i), pd = n(/p[oó]s-?doutorado/i);
+      linhas.push(`<tr><td>${esc(CAPG_TIPOS[t].nome)}</td><td>${ano||'?'}</td><td class="n">${m}</td><td class="n">${dd}</td><td class="n">${pd}</td><td class="n"><b>${m+dd+pd}</b></td></tr>`);
+    }
   }));
-  $('#resumoCapg').innerHTML = linhas.length ? `<div class="tblwrap"><table><tr><th>Planilha</th><th>Ano</th><th>Linhas</th><th>Mestrado</th><th>Doutorado</th><th>Pós-doc</th></tr>${linhas.join('')}</table></div>
+  $('#resumoCapg').innerHTML = linhas.length ? `<div class="tblwrap"><table><tr><th>Planilha</th><th>Ano</th><th>Mestrado</th><th>Doutorado</th><th>Pós-doc</th><th>Total</th></tr>${linhas.join('')}</table></div>
     <p class="sub" style="margin-top:6px">Entram no Excel consolidado as abas: Discentes ativos, Ingressantes, Titulados, Pós-doutorandos, Disciplinas oferecidas e Disciplinas por código (filtradas pelo ano-base escolhido).</p>`
     : '<p class="sub">Nenhuma planilha do CAPG importada.</p>';
   setTimeout(renderDashboard, 0);
@@ -1545,14 +1629,17 @@ const DASH_SERIES = [{nome:'Doutorado', cor:'#0B6E94'}, {nome:'Mestrado', cor:'#
 function nivelSerie(n){ return /p[oó]s-?doutorado/i.test(n||'') ? 2 : /^mestrado/i.test(n||'') ? 1 : 0; }
 function kpi(rotulo, valor, detalhe){ return `<div class="kpi"><div class="kpi-r">${esc(rotulo)}</div><div class="kpi-v">${valor}</div><div class="kpi-d">${detalhe||'&nbsp;'}</div></div>`; }
 function legenda(series){ return `<div class="dash-leg">${series.map(s=>`<span><i style="background:${s.cor}"></i>${esc(s.nome)}</span>`).join('')}</div>`; }
-function barras(linhas, series, vazio){
+function barras(linhas, series, vazio, rotTotal){
   if(!linhas.length) return `<p class="sub">${vazio}</p>`;
+  const somaS = series.map((_,i)=>linhas.reduce((a,l)=>a+(l.v[i]||0),0)), soma = somaS.reduce((a,b)=>a+b,0);
+  const detT = series.length>1 ? series.map((s,i)=>`${somaS[i]} ${s.nome.toLowerCase()}`).join(' · ') : '';
+  const linhaTotal = `<div class="dash-row dash-total"><div class="dash-lab">Total</div><div class="dash-tdet">${rotTotal || detT}</div><div class="dash-tot">${soma}</div></div>`;
   const max = Math.max(...linhas.map(l=>l.v.reduce((a,b)=>a+b,0)), 1);
   return `<div class="dash-bars">${linhas.map(l=>{ const tot = l.v.reduce((a,b)=>a+b,0);
     const det = series.map((s,i)=>l.v[i] ? `${s.nome}: ${l.v[i]}` : '').filter(Boolean).join(' · ');
     return `<div class="dash-row"><div class="dash-lab" title="${esc(l.full||l.r)}">${esc(l.r)}</div>
       <div class="dash-track">${l.v.map((v,i)=>v ? `<span class="dash-seg" style="width:${v/max*100}%;background:${series[i].cor}" data-tip="${esc(l.full||l.r)} — ${esc(series[i].nome)}: ${v}"></span>` : '').join('')}</div>
-      <div class="dash-tot" title="${esc(det)}">${tot}</div></div>`; }).join('')}</div>`;
+      <div class="dash-tot" title="${esc(det)}">${tot}</div></div>`; }).join('')}${linhaTotal}</div>`;
 }
 // nome curto: primeiro + último sobrenome, mantendo partículas ("Marco Di Luccio", "Débora de Oliveira")
 const nomeCurto = n => { const t = String(n).split(' '); if(t.length<=2) return n;
@@ -1612,7 +1699,7 @@ function renderDashboard(){
   const serDM = DASH_SERIES.slice(0,2), semCapg = 'Importe as planilhas do CAPG para ver este gráfico.';
   h += `<div class="dash-grid">
     <div class="dash-box"><h3>Orientandos ativos por docente</h3>${legenda(DASH_SERIES)}${barras(linDoc, DASH_SERIES, semCapg)}</div>
-    <div class="dash-box"><h3>Publicações no WoS por docente (${rot})</h3><p class="sub" style="margin:0 0 8px">Artigos em coautoria contam para cada docente.</p>${barras(linPub, [{nome:'Publicações', cor:'#0B6E94'}], 'Importe a exportação do Web of Science para ver este gráfico.')}</div>
+    <div class="dash-box"><h3>Publicações no WoS por docente (${rot})</h3><p class="sub" style="margin:0 0 8px">Artigos em coautoria contam para cada docente.</p>${barras(linPub, [{nome:'Publicações', cor:'#0B6E94'}], 'Importe a exportação do Web of Science para ver este gráfico.', `soma por docente · ${wos.length} artigo(s) diferentes`)}</div>
     <div class="dash-box dash-larga"><h3>Discentes ativos por linha de pesquisa</h3>${legenda(serDM)}${barras(linLinha, serDM, semCapg)}</div>
     <div class="dash-box"><h3>Discentes ativos por agência de bolsa</h3><p class="sub" style="margin:0 0 8px">Com mais de uma bolsa, conta a de mais meses.</p>${legenda(serDM)}${barras(linBolsa, serDM, semCapg)}</div>
   </div>`;
@@ -1675,8 +1762,99 @@ function initDashboard(){
   });
 }
 
+/* =====================================================================
+   RELATÓRIO ANUAL — página pronta para imprimir / salvar em PDF
+   ===================================================================== */
+function tabelaRel(cab, linhas, vazio){
+  if(!linhas.length) return `<p class="sub">${vazio||'Sem dados para este ano.'}</p>`;
+  return `<table class="rel-tab"><thead><tr>${cab.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${
+    linhas.map(l=>`<tr>${l.map(c=>`<td>${esc(c ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function gerarRelatorio(ano){
+  $('#filtroAno').value = String(ano); renderAdmin();          // indicadores do ano
+  const dash = $('#dashCorpo').innerHTML;
+  const evo = $('#dashEvo').innerHTML;
+  const reg = capgAno('regulares'), ing = capgAno('ingressantes'), con = capgAno('concluintes');
+  const ativos = reg.filter(r=>!ehPosDoc(r)), ingD = ing.filter(r=>!ehPosDoc(r)), tit = con.filter(r=>!ehPosDoc(r));
+  const pd = [...reg.filter(ehPosDoc).map(r=>({...r, st:'Ativo'})), ...con.filter(ehPosDoc).map(r=>({...r, st:'Finalizado'}))];
+  const dis = capgAno('disciplinas'), wos = wosFiltrado(), temLattes = Object.keys(fontes().lattes).length;
+  const pats = temLattes ? patentesLattes() : [];
+  const ps = pacotesFiltrados().filter(p=>p.origem!=='secretaria');
+  const cvs = Object.values(fontes().lattes);
+  const conta = (l,re)=>l.filter(r=>re.test(r['Nível']||'')).length;
+  const ordNome = (a,b,k)=>String(a[k]||'').localeCompare(String(b[k]||''),'pt');
+  let n = 0; const sec = t => `<h2 class="rel-h2">${++n}. ${t}</h2>`;
+
+  // disciplinas por código
+  const grp = new Map();
+  dis.forEach(r=>{ const g = grp.get(r['Código']) || {cod:r['Código'], nome:r['Disciplina'], cred:r['Créd.'], per:new Set(), niv:new Set(), alunos:0};
+    g.per.add(r['Per.']); g.niv.add(r['Nível']); g.alunos += +r['Alunos']||0; grp.set(r['Código'], g); });
+
+  // atividades do formulário
+  const ativ = CATEGORIAS.filter(c=>c.quem==='docente').map(c=>{
+    const itens = ps.flatMap(p=>(p.itens[c.id]||[]).map(it=>({doc:p.docente.nome, it})));
+    const cab = ['Docente', ...c.resumo.map(k=>c.campos.find(f=>f.id===k)?.label || k)];
+    const lin = itens.map(({doc,it})=>[doc, ...c.resumo.map(k=>{ const f = c.campos.find(x=>x.id===k); return f && f.tipo==='date' ? fmtData(it[k]) : it[k]; })]);
+    return {c, itens, cab, lin};
+  });
+
+  const html = `
+  <div class="rel-capa">
+    <img src="${document.querySelector('header.top img.ppgeal').src}" alt="PPGEAL" style="height:56px">
+    <h1>Relatório anual de dados para a Plataforma Sucupira</h1>
+    <p><b>Ano-base ${ano}</b> · Quadriênio ${esc(CONFIG.quadrienio)} · Área de concentração: ${esc(CONFIG.areaConcentracao)}</p>
+    <p class="sub">Gerado em ${new Date().toLocaleString('pt-BR')} pela página de coleta do PPGEAL. Fontes: formulário dos docentes, planilhas do CAPG, Currículos Lattes e Web of Science, conforme importados no painel da secretaria.</p>
+  </div>
+
+  ${sec('Indicadores do programa')}
+  <div class="rel-dash">${dash}<h3 class="rel-h3">Evolução no quadriênio</h3>${evo}</div>
+
+  <div class="rel-quebra"></div>
+  ${sec('Corpo discente')}
+  ${tabelaRel(['', 'Mestrado', 'Doutorado', 'Pós-doc', 'Total'], [
+    ['Ativos', conta(ativos,/^mestrado/i), conta(ativos,/^doutorado/i), reg.filter(ehPosDoc).length, reg.length],
+    ['Ingressantes', conta(ingD,/^mestrado/i), conta(ingD,/^doutorado/i), ing.filter(ehPosDoc).length, ing.length],
+    ['Titulados / finalizados', conta(tit,/^mestrado/i), conta(tit,/^doutorado/i), con.filter(ehPosDoc).length, con.length]], 'Importe as planilhas do CAPG.')}
+  <h3 class="rel-h3">Titulados em ${ano}</h3>
+  ${tabelaRel(['Nível','Discente','Orientador(a)','Defesa','Meses','Título'], [...tit].sort((a,b)=>ordNome(a,b,'Aluno')).map(r=>[r['Nível'], r['Aluno'], r['Orientador'], r['Dt. defesa'], r['Tempo conclusão'], r['Título tese/dissertação']]))}
+  <h3 class="rel-h3">Ingressantes em ${ano}</h3>
+  ${tabelaRel(['Nível','Discente','Orientador(a)','Linha de pesquisa','Situação'], [...ingD].sort((a,b)=>ordNome(a,b,'Aluno')).map(r=>[r['Nível'], r['Aluno'], r['Orientador'], r['Linha de pesquisa'], r['Situação aluno']]))}
+  <h3 class="rel-h3">Pós-doutorandos</h3>
+  ${tabelaRel(['Situação','Pós-doutorando(a)','Supervisor(a)','Início','Linha de pesquisa'], pd.sort((a,b)=>ordNome(a,b,'Aluno')).map(r=>[r.st, r['Aluno'], r['Orientador'], r['Dt. início'] || '', r['Linha de pesquisa']]))}
+
+  <div class="rel-quebra"></div>
+  ${sec('Disciplinas oferecidas pelo PPGEAL')}
+  ${tabelaRel(['Código','Disciplina','Créditos','Períodos','Níveis','Alunos'], [...grp.values()].sort((a,b)=>a.cod.localeCompare(b.cod)).map(g=>[g.cod, g.nome, g.cred, [...g.per].sort().join(', '), [...g.niv].sort().join(', '), g.alunos]), 'Importe a planilha de disciplinas oferecidas do CAPG.')}
+
+  <div class="rel-quebra"></div>
+  ${sec('Produção intelectual')}
+  <p>${wos.length} publicação(ões) no Web of Science em ${ano}${wos.length ? `, das quais ${wos.filter(w=>w.paises && w.paises.split('; ').some(p=>p && !/^brazil$/i.test(p))).length} com coautoria internacional` : ''}. ${temLattes ? `${pats.length} patente(s) ou registro(s) no ano, segundo ${cvs.length} currículo(s) Lattes importado(s).` : 'Currículos Lattes ainda não importados.'}</p>
+  <h3 class="rel-h3">Publicações no Web of Science</h3>
+  ${tabelaRel(['Título','Periódico','Docentes do PPGEAL','DOI'], wos.map(w=>[w.titulo, w.periodico, w.docentes.join('; '), w.doi]), 'Importe a exportação do Web of Science.')}
+  <h3 class="rel-h3">Patentes e registros</h3>
+  ${tabelaRel(['Título','Tipo','Depósito','Concessão','Docentes do PPGEAL'], pats.map(p=>[p.titulo, p.tipo, dataLattes(p.deposito), dataLattes(p.concessao), p.docentes.join('; ')]), temLattes ? 'Nenhuma patente ou registro no ano.' : 'Importe os currículos Lattes.')}
+
+  <div class="rel-quebra"></div>
+  ${sec('Atividades informadas pelos docentes')}
+  <p>${ps.length} de ${CONFIG.docentes.length} docentes enviaram o formulário para ${ano}.</p>
+  ${ativ.map(a=>`<h3 class="rel-h3">${esc(a.c.titulo)} <span class="sub">(${a.itens.length})</span></h3>${tabelaRel(a.cab, a.lin, 'Nenhum item informado.')}`).join('')}
+
+  <div class="rel-quebra"></div>
+  ${sec('Situação da coleta por docente')}
+  ${tabelaRel(['Docente','Formulário enviado','Lattes atualizado em','Publicações WoS no ano'], CONFIG.docentes.map(d=>{
+    const p = ps.find(x=>x.docente.nome===d), cv = cvs.find(c=>c.docente===d);
+    return [d, p ? new Date(p.enviadoEm).toLocaleDateString('pt-BR') : 'não', cv ? dataLattes(cv.atualizado) : 'não importado', wos.filter(w=>w.docentes.includes(d)).length];
+  }))}
+  <p class="sub rel-rodape">Relatório gerado automaticamente. Confira os dados com as fontes originais antes de lançar no Sucupira.</p>`;
+  $('#relCorpo').innerHTML = html;
+  $('#relAno').innerHTML = CONFIG.anos.map(a=>`<option ${a===+ano?'selected':''}>${a}</option>`).join('');
+}
+
 /* ---------- início ---------- */
 initIdent(); initBarra(); initAdminUI(); initFontesUI(); initCapgUI(); initDashboard();
+$('#btnRelatorio').onclick = ()=>{ location.hash = 'relatorio-' + ($('#filtroAno').value || CONFIG.anoPadrao); };
+$('#relAno').onchange = e=>{ location.hash = 'relatorio-' + e.target.value; };
+$('#btnImprimirRel').onclick = ()=>window.print();
 $('#btnSairSec').onclick = ()=>{ try{ sessionStorage.removeItem('ppgeal-sec'); }catch(e){} window._sec = false; location.hash = ''; };
 $('#formSenha').addEventListener('submit', async e=>{
   e.preventDefault();
