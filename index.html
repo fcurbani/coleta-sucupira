@@ -36,6 +36,24 @@ const CONFIG = {
     'Jéssica de Matos Fonseca', 'João Borges Laurindo', 'Marcelo Lanza',
     'Marco Di Luccio', 'Patrícia Poletto', 'Sandra Regina Salvador Ferreira'
   ],
+  // Identificadores dos docentes: ID Lattes, ORCID, ResearcherID (WoS) e Google Acadêmico
+  identificadores: {
+    'Acácio Antônio Ferreira Zielinski': {"lattes": "7404959088330237", "orcid": "0000-0002-6184-9628", "rid": "N-4432-2013", "scholar": "https://scholar.google.com.br/citations?user=XC5DR5UAAAAJ&hl=pt-BR"},
+    'Alan Ambrosi': {"lattes": "8226223954818145", "orcid": "0000-0002-2635-5980", "rid": "AAF-9437-2019", "scholar": "https://scholar.google.com.br/citations?user=sEXF1a0AAAAJ&hl=pt-PT"},
+    'Alcilene Rodrigues Monteiro Fritz': {"lattes": "7098980188917700", "orcid": "0000-0002-4403-008X", "rid": "G-5974-2019", "scholar": "https://scholar.google.com.br/citations?user=xERBQYMAAAAJ&hl=pt-BR"},
+    'Bruno Augusto Mattar Carciofi': {"lattes": "5395732758179393", "orcid": "0000-0002-9233-0984", "rid": "G-6545-2012", "scholar": "https://scholar.google.com.br/citations?user=hgXEsx0AAAAJ&hl=pt-BR"},
+    'Débora de Oliveira': {"lattes": "5730572517284307", "orcid": "0000-0001-7544-5045", "rid": "AAO-9811-2020", "scholar": "https://scholar.google.com/citations?user=jVfyw0oAAAAJ&hl=pt-BR&oi=ao"},
+    'Elane Schwinden Prudêncio': {"lattes": "5749071662776272", "orcid": "0000-0001-6060-3864", "rid": "MXL-7588-2025", "scholar": ""},
+    'Franciny Campos Schmidt': {"lattes": "8932897788946769", "orcid": "0000-0002-8370-2555", "rid": "ABG-9382-2020", "scholar": "https://scholar.google.com/citations?hl=pt-BR&user=8_SlJSgAAAAJ"},
+    'Germán Ayala Valência': {"lattes": "2567362656670254", "orcid": "0000-0001-9824-4510", "rid": "I-3307-2012", "scholar": "https://scholar.google.com.br/citations?user=j_QksiIAAAAJ&hl=em"},
+    'Jaciane Lutz Ienczak': {"lattes": "0956965042711324", "orcid": "0000-0003-4087-8339", "rid": "I-3277-2013", "scholar": "https://scholar.google.com.br/citations?user=dwC_z6sAAAAJ&hl=pt-BR"},
+    'Jéssica de Matos Fonseca': {"lattes": "5249913119195180", "orcid": "0000-0001-8718-9309", "rid": "ABG-2033-2020", "scholar": "https://scholar.google.com/citations?view_op=list_works&hl=pt-BR&user=fRa0gKwAAAAJ"},
+    'João Borges Laurindo': {"lattes": "4327070396737714", "orcid": "0000-0003-0663-6600", "rid": "AAX-7666-2020", "scholar": "https://scholar.google.com/citations?user=CxVcdFsAAAAJ&hl=j%C3%A1"},
+    'Marcelo Lanza': {"lattes": "9025156952498494", "orcid": "0000-0002-5133-7397", "rid": "Y-1203-2019", "scholar": ""},
+    'Marco Di Luccio': {"lattes": "4651216884517824", "orcid": "0000-0002-3769-3694", "rid": "KAZ-9637-2024", "scholar": "https://scholar.google.com/citations?user=g1X_fGAAAAAJ&hl=em"},
+    'Patrícia Poletto': {"lattes": "6640406037714431", "orcid": "0000-0001-6709-8143", "rid": "Q-7994-2019", "scholar": "https://scholar.google.com/citations?user=fV58MiAAAAAJ&hl=es"},
+    'Sandra Regina Salvador Ferreira': {"lattes": "3183635792396746", "orcid": "0000-0003-3393-0995", "rid": "I-6426-2013", "scholar": "https://scholar.google.com.br/citations?user=raDDSHwAAAAJ&hl=pt-BR"}
+  },
   // Hierarquia: área de concentração → linhas de pesquisa → projetos de pesquisa do programa
   areaConcentracao: 'Desenvolvimento de Processos da Indústria de Alimentos',
   linhas: [
@@ -322,15 +340,12 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <h3>2. Web of Science (publicações)</h3>
       <ol>
         <li>Acesse o <a href="https://www.periodicos.capes.gov.br/" target="_blank" rel="noopener">Portal de Periódicos da CAPES</a> com o acesso CAFe da UFSC e abra o Web of Science (Core Collection).</li>
-        <li>Monte a busca dos docentes do PPGEAL. Uma forma prática é a <b>Advanced Search</b>, juntando os autores e o endereço, por exemplo:<br>
-          <code>AU=("Lanza M*" OR "Di Luccio M*" OR "Poletto P*") AND AD=(Santa Catarina)</code><br>
-          Se os docentes tiverem ResearcherID ou ORCID, a busca por esses identificadores é mais precisa.</li>
-        <li>Filtre pelo ano de publicação (Publication Years) desejado.</li>
+        <li>Abra <b>Advanced Search</b>. No painel da secretaria, no quadro Fontes externas, há a <b>consulta pronta</b> com os ResearcherIDs e ORCIDs dos 15 docentes e o ano escolhido. Clique em <b>Copiar</b> e cole no campo da busca avançada. Ela tem o formato <code>AI=(N-4432-2013 OR … ) AND PY=2026</code>.</li>
         <li>Clique em <b>Export</b> e escolha <b>Excel</b> (ou <b>Tab delimited file</b>).</li>
         <li>Em <b>Record Content</b>, escolha <b>Full Record</b>. Exporte até 1.000 registros por vez (1–1000, 1001–2000…).</li>
         <li>No painel, em <b>Web of Science</b>, selecione o arquivo baixado (<code>savedrecs.xls</code> ou <code>savedrecs.txt</code>).</li>
       </ol>
-      <p>A página identifica os docentes do PPGEAL pelo nome dos autores e marca se o artigo tem endereço UFSC. Confira essas duas colunas: autores com sobrenome comum podem gerar falso positivo.</p>
+      <p>A página identifica os docentes de cada artigo pelo ResearcherID e pelo ORCID que vêm na exportação. Quando só o nome bate, a coluna “Identificado por” mostra “só nome (conferir)”.</p>
 
       <h3>3. Gerar o Excel</h3>
       <p>Escolha o ano-base no painel e clique em <b>Exportar Excel consolidado</b>. Além das abas dos docentes, aparecem: <b>Lattes – atualização</b>, <b>Publicações (Lattes)</b>, <b>Patentes (Lattes)</b> e <b>Publicações (WoS)</b>. Publicações repetidas entre docentes coautores aparecem uma vez só, com todos os nomes. A coluna “Também no WoS?” cruza o Lattes com o WoS pelo DOI.</p>
@@ -398,6 +413,9 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       <div id="resumoLattes"></div>
       <h3 style="margin:16px 0 6px">Web of Science</h3>
       <div id="resumoWos"></div>
+      <label for="consultaWos" style="margin-top:10px">Consulta pronta para a busca avançada do WoS <span class="help">ResearcherIDs e ORCIDs dos 15 docentes, no ano-base escolhido acima. Copie e cole em Advanced Search.</span></label>
+      <div class="row"><textarea id="consultaWos" readonly style="flex:1;min-height:70px;font-family:monospace;font-size:.8rem"></textarea><button type="button" id="btnCopiarWos">Copiar</button></div>
+      <details style="margin-top:14px"><summary style="cursor:pointer;font-weight:600;color:var(--pri)">Links dos docentes (Lattes, ORCID, Google Acadêmico)</summary><div id="linksDocentes" style="margin-top:8px"></div></details>
       <div class="row" style="margin-top:10px"><span class="spacer"></span><button class="danger" id="btnLimparFontes">Limpar fontes externas</button></div>
     </div>
     <div class="card">
@@ -1031,6 +1049,7 @@ const anoDeDataLattes = v => /^\d{8}$/.test(v||'') ? +v.slice(4) : null;
 function fontes(){ return (admin.fontes ||= {lattes:{}, wos:{}}); }
 function anosFiltro(){ const a = $('#filtroAno').value; return a ? [+a] : CONFIG.anos; }
 function noPeriodo(...anos){ const f = anosFiltro(); return anos.some(a=>a && f.includes(+a)); }
+function docentePorIdLattes(id){ return Object.entries(CONFIG.identificadores||{}).find(([,v])=>v.lattes===String(id))?.[0]; }
 function docenteCanonico(nome){
   const n = norm(nome); const d = CONFIG.docentes.find(x=>norm(x)===n);
   if(d) return d;
@@ -1071,7 +1090,7 @@ function lerLattes(texto, arquivo){
   const cv = doc.querySelector('CURRICULO-VITAE');
   if(!cv || doc.querySelector('parsererror')) throw new Error('não é um currículo Lattes em XML');
   const nome = attr(cv.querySelector('DADOS-GERAIS'), 'NOME-COMPLETO');
-  const r = {id: attr(cv,'NUMERO-IDENTIFICADOR') || nome, nome, docente: docenteCanonico(nome),
+  const r = {id: attr(cv,'NUMERO-IDENTIFICADOR') || nome, nome, docente: docentePorIdLattes(attr(cv,'NUMERO-IDENTIFICADOR')) || docenteCanonico(nome),
     atualizado: attr(cv,'DATA-ATUALIZACAO'), arquivo, producoes:[], patentes:[]};
   const prod = (tipo, el, basePref, detPref, tituloAttr, anoAttr, veicAttr) => {
     const b = filho(el, basePref), d = filho(el, detPref);
@@ -1115,7 +1134,7 @@ function lerLattesHTML(doc, arquivo){
   const id = (/ID Lattes:\s*(\d{16})/.exec(corpo)||[])[1] || (/lattes\.cnpq\.br\/(\d{16})/.exec(corpo)||[])[1] || nome;
   const at = (/Última atualização do currículo em (\d{2})\/(\d{2})\/(\d{4})/.exec(corpo));
   if(!nome || !/Lattes/i.test(doc.title||'') || !/ID Lattes/.test(corpo)) throw new Error('não é uma página de currículo Lattes');
-  const r = {id, nome, docente: (typeof docenteCanonico==='function' ? docenteCanonico(nome) : nome), atualizado: at ? at[1]+at[2]+at[3] : '', arquivo, producoes:[], patentes:[]};
+  const r = {id, nome, docente: docentePorIdLattes(id) || docenteCanonico(nome), atualizado: at ? at[1]+at[2]+at[3] : '', arquivo, producoes:[], patentes:[]};
   // percorre o documento em ordem, guardando a seção (h1) e a subseção (div.inst_back / b) atuais
   let top='', anc='', sub='';
   const SECOES = new Set(['ArtigosCompletos','LivrosCapitulos','TrabalhosPublicadosAnaisCongresso']);
@@ -1182,7 +1201,7 @@ function lerLattesQualquer(texto, arquivo){
 /* ---------- Web of Science ---------- */
 const WOS_COLS = { // tag do arquivo .txt : nome da coluna no Excel exportado
   TI:'Article Title', AU:'Authors', AF:'Author Full Names', SO:'Source Title', PY:'Publication Year', DI:'DOI',
-  DT:'Document Type', TC:'Times Cited, WoS Core', Z9:'Times Cited, All Databases', C1:'Addresses', SN:'ISSN', EI:'eISSN', UT:'UT (Unique WOS ID)'};
+  DT:'Document Type', TC:'Times Cited, WoS Core', Z9:'Times Cited, All Databases', C1:'Addresses', SN:'ISSN', EI:'eISSN', UT:'UT (Unique WOS ID)', RI:'Researcher Ids', OI:'ORCIDs'};
 function linhasWos(nome, buf){
   if(/\.(xls|xlsx)$/i.test(nome)){
     const wb = XLSX.read(buf, {type:'array'}); const ws = wb.Sheets[wb.SheetNames[0]];
@@ -1204,6 +1223,11 @@ function paisesWos(c1){
   });
   return [...s];
 }
+function docentesPorIdWos(ri, oi){
+  const txt = (String(ri||'')+';'+String(oi||'')).toUpperCase();
+  return Object.entries(CONFIG.identificadores||{}).filter(([,v])=>
+    (v.rid && txt.includes(v.rid.toUpperCase())) || (v.orcid && txt.includes(v.orcid.toUpperCase()))).map(([n])=>n);
+}
 function docentesNoWos(af, au){
   const autores = String(af || au).split(';').map(x=>x.trim()).filter(Boolean).map(x=>{
     const [sob, dado=''] = x.split(','); return {sob:norm(sob), dado:norm(dado)}; });
@@ -1220,7 +1244,9 @@ function docentesNoWos(af, au){
 function lerWos(nome, buf){
   return linhasWos(nome, buf).filter(r=>r.TI).map(r=>({
     ut:r.UT, titulo:r.TI, periodico:r.SO, ano:+r.PY||null, doi:r.DI.toLowerCase(), tipo:r.DT, autores:r.AF||r.AU,
-    docentes: docentesNoWos(r.AF, r.AU), ufsc: /santa catarina|ufsc/i.test(r.C1) ? 'Sim' : (r.C1 ? 'Não' : '?'),
+    ...(()=>{ const porId = docentesPorIdWos(r.RI, r.OI), porNome = docentesNoWos(r.AF, r.AU).filter(d=>!porId.includes(d));
+      return {docentes:[...porId, ...porNome], identificacao: porId.length ? (porNome.length ? 'ID + nome' : 'ID') : (porNome.length ? 'só nome (conferir)' : '')}; })(),
+    ufsc: /santa catarina|ufsc/i.test(r.C1) ? 'Sim' : (r.C1 ? 'Não' : '?'),
     paises: paisesWos(r.C1).join('; '), citacoes: r.TC!=='' ? +r.TC : '', issn: r.SN || r.EI }));
 }
 
@@ -1267,10 +1293,26 @@ function abasFontes(wb){
       ...patentesLattes().map(p=>[p.docentes.join('; '), p.tipo, p.titulo, p.ano, p.codigo, dataLattes(p.deposito), dataLattes(p.concessao), p.instituicao, p.depositante, p.pais, p.inventores])]);
   }
   const ws = wosFiltrado();
-  if(ws.length) add('Publicações (WoS)', [['Ano','Título','Periódico','DOI','Tipo de documento','Docentes PPGEAL (pelo nome)','Endereço UFSC?','Países','Citações (WoS)','ISSN','Autores','ID WoS'],
-    ...ws.map(w=>[w.ano, w.titulo, w.periodico, w.doi ? 'https://doi.org/'+w.doi : '', w.tipo, w.docentes.join('; '), w.ufsc, w.paises, w.citacoes, w.issn, w.autores, w.ut])]);
+  if(ws.length) add('Publicações (WoS)', [['Ano','Título','Periódico','DOI','Tipo de documento','Docentes PPGEAL','Identificado por','Endereço UFSC?','Países','Citações (WoS)','ISSN','Autores','ID WoS'],
+    ...ws.map(w=>[w.ano, w.titulo, w.periodico, w.doi ? 'https://doi.org/'+w.doi : '', w.tipo, w.docentes.join('; '), w.identificacao||'', w.ufsc, w.paises, w.citacoes, w.issn, w.autores, w.ut])]);
+}
+function consultaWos(){
+  const v = Object.values(CONFIG.identificadores||{});
+  const ids = [...v.map(x=>x.rid), ...v.map(x=>x.orcid)].filter(Boolean);
+  const anos = anosFiltro();
+  const py = anos.length===1 ? `PY=${anos[0]}` : `PY=(${anos[0]}-${anos[anos.length-1]})`;
+  return `AI=(${ids.join(' OR ')}) AND ${py}`;
+}
+function renderLinksDocentes(){
+  const cvs = Object.values(fontes().lattes);
+  $('#linksDocentes').innerHTML = `<div class="tblwrap"><table><tr><th>Docente</th><th>Lattes</th><th>ORCID</th><th>ResearcherID</th><th>Google Acadêmico</th><th>Lattes importado?</th></tr>
+    ${CONFIG.docentes.map(d=>{ const v=(CONFIG.identificadores||{})[d]||{}; const imp = cvs.some(c=>c.docente===d);
+      return `<tr><td>${esc(d)}</td><td>${v.lattes?`<a href="http://lattes.cnpq.br/${esc(v.lattes)}" target="_blank" rel="noopener">abrir</a>`:'—'}</td>
+      <td>${v.orcid?`<a href="https://orcid.org/${esc(v.orcid)}" target="_blank" rel="noopener">${esc(v.orcid)}</a>`:'—'}</td><td>${esc(v.rid||'—')}</td>
+      <td>${v.scholar?`<a href="${esc(v.scholar)}" target="_blank" rel="noopener">abrir</a>`:'—'}</td><td class="n">${imp?'✔':''}</td></tr>`; }).join('')}</table></div>`;
 }
 function renderFontes(){
+  if($('#consultaWos')){ $('#consultaWos').value = consultaWos(); renderLinksDocentes(); }
   const cvs = Object.values(fontes().lattes).sort((a,b)=>a.docente.localeCompare(b.docente,'pt'));
   const anos = anosFiltro(), rot = anos.length===1 ? anos[0] : `${anos[0]}–${anos[anos.length-1]}`;
   $('#resumoLattes').innerHTML = cvs.length ? `<div class="tblwrap"><table><tr><th>Docente</th><th>Lattes atualizado em</th><th>Artigos ${rot}</th><th>Eventos ${rot}</th><th>Livros/cap. ${rot}</th><th>Patentes ${rot}</th></tr>
@@ -1283,7 +1325,7 @@ function renderFontes(){
     : '<p class="sub">Nenhum currículo importado.</p>';
   const ws = wosFiltrado(), todos = Object.keys(fontes().wos).length;
   $('#resumoWos').innerHTML = todos
-    ? `<p><b>${ws.length}</b> publicações em ${rot} (de ${todos} importadas) · <b>${ws.filter(w=>w.ufsc==='Sim').length}</b> com endereço UFSC · <b>${ws.filter(w=>w.docentes.length).length}</b> com docente do PPGEAL identificado pelo nome.</p>`
+    ? `<p><b>${ws.length}</b> publicações em ${rot} (de ${todos} importadas) · <b>${ws.filter(w=>w.ufsc==='Sim').length}</b> com endereço UFSC · <b>${ws.filter(w=>w.docentes.length).length}</b> com docente do PPGEAL identificado (${ws.filter(w=>/ID/.test(w.identificacao||'')).length} pelo ResearcherID/ORCID, ${ws.filter(w=>/só nome/.test(w.identificacao||'')).length} só pelo nome — conferir).</p>`
     : '<p class="sub">Nenhuma exportação importada.</p>';
 }
 function initFontesUI(){
@@ -1309,6 +1351,11 @@ function initFontesUI(){
     store.set(LS_ADMIN, admin);
     $('#msgFontes').innerHTML = `<div class="msg ${erros.length?'err':'ok'}">${n} registro(s) do Web of Science importado(s)${erros.length?'. Problemas: '+esc(erros.join('; ')):''}</div>`;
     renderFontes();
+  };
+  $('#btnCopiarWos').onclick = async ()=>{
+    const t = $('#consultaWos'); t.select();
+    try{ await navigator.clipboard.writeText(t.value); }catch(e){ document.execCommand && document.execCommand('copy'); }
+    $('#btnCopiarWos').textContent = 'Copiado!'; setTimeout(()=>$('#btnCopiarWos').textContent='Copiar', 1500);
   };
   $('#btnLimparFontes').onclick = async ()=>{
     if(!await confirmar('Limpar fontes externas', '<p>Remove os currículos Lattes e os registros do Web of Science importados neste navegador.</p>', 'Limpar')) return;
