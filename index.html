@@ -178,6 +178,41 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .seg input:checked+span{background:var(--pri);color:#fff}
 .seg input:focus-visible+span{outline:2px solid var(--broto);outline-offset:-2px}
 .seg.invalid{border-color:var(--err)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,45%),1fr));gap:10px;margin:8px 0 18px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#fff}
+.kpi-r{font-size:.82rem;color:var(--mute);font-weight:600}
+.kpi-v{font-size:1.9rem;font-weight:700;color:var(--ink);line-height:1.15;margin:2px 0}
+.kpi-v small{font-size:1rem;color:var(--mute);font-weight:600}
+.kpi-d{font-size:.8rem;color:var(--mute)}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.dash-grid{grid-template-columns:1fr}}
+.dash-box{border:1px solid var(--line);border-radius:8px;padding:14px 16px;background:#fff}
+.dash-box h3{margin:0 0 6px;font-size:.98rem;color:var(--ink)}
+.dash-leg{display:flex;gap:14px;font-size:.8rem;color:var(--mute);margin-bottom:8px}
+.dash-leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.dash-bars{display:flex;flex-direction:column;gap:5px}
+.dash-row{display:grid;grid-template-columns:150px 1fr 34px;align-items:center;gap:8px;font-size:.84rem}
+.dash-larga .dash-row{grid-template-columns:260px 1fr 34px}
+@media (max-width:600px){.dash-row,.dash-larga .dash-row{grid-template-columns:120px 1fr 30px}}
+.dash-lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+.dash-track{display:flex;gap:2px;height:14px;align-items:stretch}
+.dash-seg{display:block;min-width:3px;height:100%}
+.dash-seg:last-child{border-radius:0 4px 4px 0}
+.dash-tot{text-align:right;color:var(--mute);font-variant-numeric:tabular-nums}
+.evo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.evo-box{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#fff}
+.evo-box h4{margin:0 0 8px;font-size:.88rem;color:var(--ink);min-height:2.4em}
+.evo-plot{display:flex;gap:6px;align-items:flex-end;border-bottom:1px solid #C5D3DA}
+.evo-col{flex:1;display:flex;flex-direction:column;align-items:center}
+.evo-val{font-size:.8rem;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;margin-bottom:2px}
+.evo-nd{color:#9aa5b1;font-weight:400}
+.evo-bar{width:70%;max-width:34px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px}
+.evo-seg{display:block;width:100%;min-height:2px}
+.evo-seg:first-child{border-radius:4px 4px 0 0}
+.evo-anos{display:flex;gap:6px;margin-top:4px}
+.evo-anos span{flex:1;text-align:center;font-size:.75rem;color:var(--mute)}
+.evo-nota{font-size:.75rem;color:var(--mute);margin-top:4px}
+.dash-tip{position:fixed;display:none;z-index:50;background:#1F2A33;color:#fff;font-size:.8rem;padding:5px 8px;border-radius:6px;pointer-events:none;max-width:320px}
 .hint{background:var(--warn-2);border-left:4px solid var(--broto);color:var(--warn);padding:10px 14px;border-radius:8px;font-size:.9rem;margin-bottom:12px}
 .stick{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 24px;z-index:5}
 table{border-collapse:collapse;width:100%;font-size:.88rem}
@@ -225,15 +260,14 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       </div>
       <div class="bloco lattes">
         <h3>Atualize seu Currículo Lattes até <span id="dataLattes"></span></h3>
-        <p>A secretaria coleta direto da fonte, por isso <b>não cadastre aqui</b>:</p>
+        <p>A secretaria vai buscar estas informações direto da fonte. Por isso, <b>mantenha-as atualizadas nos sistemas abaixo</b>, pois é de lá que vamos puxar:</p>
         <ul class="fontes">
-          <li><b>Publicações</b>: Web of Science e Lattes</li>
+          <li><b>Publicações</b>: Web of Science (pelo seu ResearcherID/ORCID) e Lattes</li>
           <li><b>Patentes</b>: Lattes</li>
           <li><b>Projetos de pesquisa</b>: SIGPEX/UFSC</li>
-          <li><b>Disciplinas do PPGEAL</b>: secretaria</li>
-          <li><b>Orientações e bancas</b>: Lattes</li>
+          <li><b>Disciplinas, orientações e bancas do PPGEAL</b>: secretaria</li>
         </ul>
-        <p>Como parte disso vem do seu Lattes, mantenha-o atualizado. <a href="https://lattes.cnpq.br/" target="_blank" rel="noopener">Acessar a Plataforma Lattes</a></p>
+        <p>Essas informações não precisam ser cadastradas nesta página. <a href="https://lattes.cnpq.br/" target="_blank" rel="noopener">Acessar a Plataforma Lattes</a></p>
       </div>
     </div>
     <div class="card">
@@ -347,7 +381,11 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       </ol>
       <p>A página identifica os docentes de cada artigo pelo ResearcherID e pelo ORCID que vêm na exportação. Quando só o nome bate, a coluna “Identificado por” mostra “só nome (conferir)”.</p>
 
-      <h3>3. Gerar o Excel</h3>
+      <h3>3. Planilhas do CAPG</h3>
+      <p>Gere no CAPG as planilhas <b>Ingressantes</b>, <b>Concluintes</b> e <b>Regulares</b> (Informações Adicionais) e <b>Disciplinas oferecidas</b> do ano. No painel, selecione todas de uma vez no quadro <b>Planilhas do CAPG</b>. A página reconhece qual é qual pelas colunas e guarda só o necessário para o Sucupira, sem CPF, nascimento, raça, deficiência ou e-mail.</p>
+      <p>Não salve essas planilhas no GitHub: elas têm dados pessoais dos alunos.</p>
+
+      <h3>4. Gerar o Excel</h3>
       <p>Escolha o ano-base no painel e clique em <b>Exportar Excel consolidado</b>. Além das abas dos docentes, aparecem: <b>Lattes – atualização</b>, <b>Publicações (Lattes)</b>, <b>Patentes (Lattes)</b> e <b>Publicações (WoS)</b>. Publicações repetidas entre docentes coautores aparecem uma vez só, com todos os nomes. A coluna “Também no WoS?” cruza o Lattes com o WoS pelo DOI.</p>
       <p>Os arquivos importados ficam guardados só neste navegador. Para recomeçar, use <b>Limpar fontes externas</b>.</p>
       <p><a href="#admin">← Voltar ao painel da secretaria</a></p>
@@ -371,7 +409,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
   <!-- ================= VISÃO SECRETARIA ================= -->
   <section id="viewAdmin" class="hidden">
     <div class="card">
-      <h2>Painel da secretaria</h2>
+      <div class="row"><h2>Painel da secretaria</h2><span class="spacer"></span><button class="sec" id="btnSairSec" type="button">Sair (bloquear)</button></div>
       <p class="sub">Junte as respostas dos docentes e exporte uma planilha consolidada, com uma aba por categoria.</p>
       <div class="row" style="margin-bottom:10px">
         <div id="boxServidor" class="row hidden">
@@ -394,6 +432,21 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
       </div>
       <div class="tblwrap" id="tabelaStatus"></div>
       <p class="sub" style="margin-top:8px">✔ n = itens cadastrados · “—” = declarou não ter atividades · em branco = não respondeu.</p>
+    </div>
+    <div class="card" id="cardDash">
+      <div class="row"><h2>Indicadores do programa</h2><span class="spacer"></span><span class="sub" style="margin:0">Ano-base: o mesmo escolhido acima</span></div>
+      <div id="dashCorpo"></div>
+      <h3 style="margin:22px 0 4px">Evolução no quadriênio</h3>
+      <div id="dashEvo"></div>
+    </div>
+    <div class="card" id="cardCapg">
+      <div class="row"><h2>Planilhas do CAPG: discentes, titulados, pós-docs e disciplinas</h2></div>
+      <p class="sub">Importe as planilhas que o CAPG gera: <b>Ingressantes</b>, <b>Concluintes</b>, <b>Regulares</b> e <b>Disciplinas oferecidas</b> (pode selecionar todas juntas; a página reconhece cada uma). Os pós-doutorandos já vêm dentro delas. CPF, data de nascimento, raça, deficiência e e-mail são <b>descartados</b> na leitura. Importar de novo a mesma planilha e ano substitui a anterior.</p>
+      <label>Planilhas do CAPG (.xlsx) <span class="help">Ex.: Ingressantes_-_Informacoes_Adicionais.xlsx, disciplinas_oferecidas_…xlsx</span></label>
+      <input id="arquivosCapg" type="file" multiple>
+      <div id="msgCapg"></div>
+      <div id="resumoCapg" style="margin-top:10px"></div>
+      <div class="row" style="margin-top:10px"><span class="spacer"></span><button class="danger" id="btnLimparCapg">Limpar planilhas do CAPG</button></div>
     </div>
     <div class="card" id="cardFontes">
       <h2>Fontes externas: Lattes e Web of Science</h2>
@@ -934,7 +987,7 @@ function montarXlsx(pacotes, comStatus){
     ws['!autofilter'] = {ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:Math.max(aoa.length-1,0), c:aoa[0].length-1}})};
     XLSX.utils.book_append_sheet(wb, ws, (c.aba||c.titulo).slice(0,31));
   });
-  if(comStatus && admin) abasFontes(wb);
+  if(comStatus && admin){ abasCapg(wb); abasFontes(wb); }
   if(!wb.SheetNames.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Sem itens cadastrados']]), 'Vazio');
   return wb;
 }
@@ -991,7 +1044,7 @@ function pacotesFiltrados(){
     .sort((a,b)=>a.docente.nome.localeCompare(b.docente.nome,'pt'));
 }
 function renderAdmin(){
-  renderFontes();
+  renderFontes(); renderDashboard();
   const ps = pacotesFiltrados();
   if(!ps.length){ $('#tabelaStatus').innerHTML = '<p class="sub" style="padding:14px">Nenhuma resposta carregada para este ano.</p>'; return; }
   const cats = CATEGORIAS;
@@ -1027,11 +1080,11 @@ function initAdminUI(){
   };
   $('#btnLimparAdmin').onclick = async ()=>{
     if(!await confirmar('Limpar painel', '<p>Remove as respostas dos docentes carregadas neste navegador (não apaga nada no servidor, nem os arquivos, nem as fontes externas).</p>', 'Limpar')) return;
-    admin = {pacotes:{}, fontes: admin.fontes}; store.set(LS_ADMIN, admin); $('#adminMsg').innerHTML=''; renderAdmin();
+    admin = {pacotes:{}, fontes: admin.fontes, capg: admin.capg}; store.set(LS_ADMIN, admin); $('#adminMsg').innerHTML=''; renderAdmin();
   };
   $('#btnExportXlsx').onclick = ()=>{
     const ps = pacotesFiltrados(), f = fontes();
-    if(!ps.length && !Object.keys(f.lattes).length && !Object.keys(f.wos).length) return msgAdmin('Nada para exportar.','err');
+    if(!ps.length && !Object.keys(f.lattes).length && !Object.keys(f.wos).length && !Object.keys(capg()).length) return msgAdmin('Nada para exportar.','err');
     try{ XLSX.writeFile(montarXlsx(ps, true), `sucupira-ppgeal-consolidado-${$('#filtroAno').value||'todos'}.xlsx`); }
     catch(e){ msgAdmin(e.message,'err'); }
   };
@@ -1312,6 +1365,7 @@ function renderLinksDocentes(){
       <td>${v.scholar?`<a href="${esc(v.scholar)}" target="_blank" rel="noopener">abrir</a>`:'—'}</td><td class="n">${imp?'✔':''}</td></tr>`; }).join('')}</table></div>`;
 }
 function renderFontes(){
+  renderCapg(); setTimeout(renderDashboard, 0);
   if($('#consultaWos')){ $('#consultaWos').value = consultaWos(); renderLinksDocentes(); }
   const cvs = Object.values(fontes().lattes).sort((a,b)=>a.docente.localeCompare(b.docente,'pt'));
   const anos = anosFiltro(), rot = anos.length===1 ? anos[0] : `${anos[0]}–${anos[anos.length-1]}`;
@@ -1363,8 +1417,267 @@ function initFontesUI(){
   };
 }
 
+/* =====================================================================
+   PLANILHAS DO CAPG — discentes, titulados, pós-doutorandos e disciplinas
+   Só guarda os campos necessários: CPF, nascimento, raça, deficiência e
+   e-mail são descartados na leitura e nunca ficam no navegador.
+   ===================================================================== */
+const CAPG_TIPOS = {
+  ingressantes: {nome:'Ingressantes', ano:'Ano início'},
+  concluintes:  {nome:'Concluintes', ano:'Ano defesa'},
+  regulares:    {nome:'Regulares (ativos)', ano:'Ano'},
+  disciplinas:  {nome:'Disciplinas oferecidas', ano:'Ano'}
+};
+const CAPG_CAMPOS = { // coluna do CAPG → campo guardado
+  aluno:['Nível','Aluno','Matrícula','Dt. início','Situação aluno','País','UF','Linha de pesquisa','Orientador','Bolsa'],
+  concluintes:['Nível','Aluno','Matrícula','Dt. defesa','Situação aluno','País','UF','Linha de pesquisa','Tempo conclusão','Orientador','Bolsa','Título tese/dissertação','Resumo','Palavras-chave'],
+  disciplinas:['Per.','Código','Disciplina','Créd.','Nível','Vagas','Alunos','100% síncrona?','Prof. Estrangeiro?','Lingua Estrangeira?','Lingua','Ementa']
+};
+function capg(){ return (admin.capg ||= {}); }
+function tipoCapg(cab){
+  if(cab.includes('Ano defesa')) return 'concluintes';
+  if(cab.includes('Ano início')) return 'ingressantes';
+  if(cab.includes('Disciplina') && cab.includes('Créd.')) return 'disciplinas';
+  if(cab.includes('Aluno') && cab.includes('Situação aluno')) return 'regulares';
+  return null;
+}
+const strCapg = v => (v===undefined || v===null) ? '' : (typeof v==='number' && Number.isInteger(v) ? String(v) : String(v)).trim();
+function lerCapg(nomeArq, buf){
+  const wb = XLSX.read(buf, {type:'array', raw:false});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const linhas = XLSX.utils.sheet_to_json(ws, {defval:'', raw:true});
+  if(!linhas.length) throw new Error('planilha vazia');
+  const cab = Object.keys(linhas[0]);
+  const tipo = tipoCapg(cab); if(!tipo) throw new Error('não reconheci como planilha do CAPG');
+  const campos = tipo==='concluintes' ? CAPG_CAMPOS.concluintes : tipo==='disciplinas' ? CAPG_CAMPOS.disciplinas : CAPG_CAMPOS.aluno;
+  const colAno = CAPG_TIPOS[tipo].ano;
+  const porAno = {};
+  const validas = linhas.filter(l=>Object.values(l).some(v=>v!==''));
+  // linhas sem ano (ex.: pós-doc encerrado) ficam no ano predominante do arquivo
+  const cont = {}; validas.forEach(l=>{ const a = parseInt(strCapg(l[colAno]),10); if(a) cont[a]=(cont[a]||0)+1; });
+  const anoArquivo = +Object.entries(cont).sort((a,b)=>b[1]-a[1])[0]?.[0] || 0;
+  validas.forEach(l=>{
+    const ano = parseInt(strCapg(l[colAno]),10) || anoArquivo;
+    const o = {};
+    campos.forEach(c=>{ o[c] = strCapg(l[c]); });
+    if(o['Orientador']){
+      const bruto = o['Orientador'].replace(/\s+/g,' '), can = docenteCanonico(bruto);
+      // nome fora da lista de docentes: padroniza maiúsculas/minúsculas (ex.: "JOSE VLADIMIR" → "Jose Vladimir")
+      o['Orientador'] = can!==bruto ? can : (bruto===bruto.toUpperCase()
+        ? bruto.toLowerCase().replace(/(^|\s)(\S)/g,(m,e,c)=>e+c.toUpperCase()).replace(/ (De|Da|Do|Dos|Das|E) /g, m=>m.toLowerCase()) : bruto);
+    }
+    (porAno[ano] ||= []).push(o);
+  });
+  return {tipo, porAno, arquivo:nomeArq};
+}
+const ehPosDoc = r => /p[oó]s-?doutorado/i.test(r['Nível']||'');
+function capgAno(tipo){
+  const anos = anosFiltro(), d = capg()[tipo] || {};
+  return Object.entries(d).filter(([a])=>anos.includes(+a)).flatMap(([a,l])=>l.map(r=>({Ano:+a, ...r})));
+}
+function abasCapg(wb){
+  const add = (nome, cab, linhas) => { if(!linhas.length) return;
+    const aoa = [cab, ...linhas]; const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = cab.map(h=>({wch: /Resumo|Ementa/.test(h) ? 60 : Math.min(45, Math.max(10, h.length+2))}));
+    ws['!autofilter'] = {ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:aoa.length-1, c:cab.length-1}})};
+    XLSX.utils.book_append_sheet(wb, ws, nome); };
+  const cabAl = ['Ano','Nível','Discente','Matrícula','Início','Situação','Linha de pesquisa','Orientador','Bolsa','País','UF'];
+  const linAl = r => [r.Ano, r['Nível'], r['Aluno'], r['Matrícula'], r['Dt. início'], r['Situação aluno'], r['Linha de pesquisa'], r['Orientador'], r['Bolsa'], r['País'], r['UF']];
+  const reg = capgAno('regulares'), ing = capgAno('ingressantes'), con = capgAno('concluintes');
+  add('Discentes ativos', cabAl, reg.filter(r=>!ehPosDoc(r)).map(linAl));
+  add('Ingressantes', cabAl, ing.filter(r=>!ehPosDoc(r)).map(linAl));
+  add('Titulados', ['Ano','Nível','Discente','Matrícula','Data da defesa','Tempo de conclusão (meses)','Linha de pesquisa','Orientador','Bolsa','Título','Palavras-chave','Resumo','País','UF'],
+    con.filter(r=>!ehPosDoc(r)).map(r=>[r.Ano, r['Nível'], r['Aluno'], r['Matrícula'], r['Dt. defesa'], r['Tempo conclusão'], r['Linha de pesquisa'], r['Orientador'], r['Bolsa'], r['Título tese/dissertação'], r['Palavras-chave'], r['Resumo'], r['País'], r['UF']]));
+  const pd = [
+    ...reg.filter(ehPosDoc).map(r=>[r.Ano, 'Ativo', r['Aluno'], r['Matrícula'], r['Dt. início'], '', r['Situação aluno'], r['Linha de pesquisa'], r['Orientador'], r['Bolsa'], r['País']]),
+    ...con.filter(ehPosDoc).map(r=>[r.Ano, 'Finalizado', r['Aluno'], r['Matrícula'], '', r['Dt. defesa'] || (r['Tempo conclusão'] ? `encerrado (${r['Tempo conclusão']} meses)` : 'encerrado'), r['Situação aluno'], r['Linha de pesquisa'], r['Orientador'], r['Bolsa'], r['País']])];
+  const ingPd = new Set(ing.filter(ehPosDoc).map(r=>r['Matrícula']));
+  add('Pós-doutorandos', ['Ano','Situação','Pós-doutorando(a)','Matrícula','Início','Término','Situação no CAPG','Linha de pesquisa','Supervisor(a)','Bolsa','País','Ingressou no ano?'],
+    pd.map(l=>[...l, ingPd.has(l[3]) ? 'Sim' : '']));
+  const dis = capgAno('disciplinas');
+  add('Disciplinas oferecidas', ['Ano','Período','Código','Disciplina','Créditos','Nível','Vagas','Alunos','100% síncrona?','Prof. estrangeiro?','Língua estrangeira?','Língua','Ementa'],
+    dis.map(r=>[r.Ano, r['Per.'], r['Código'], r['Disciplina'], r['Créd.'], r['Nível'], r['Vagas'], r['Alunos'], r['100% síncrona?'], r['Prof. Estrangeiro?'], r['Lingua Estrangeira?'], r['Lingua'], r['Ementa']]));
+  const grp = new Map();
+  dis.forEach(r=>{ const k = r.Ano+'|'+r['Código']; const g = grp.get(k) || {Ano:r.Ano, cod:r['Código'], nome:r['Disciplina'], cred:r['Créd.'], per:new Set(), niv:new Set(), alunos:0};
+    g.per.add(r['Per.']); g.niv.add(r['Nível']); g.alunos += +r['Alunos']||0; grp.set(k,g); });
+  add('Disciplinas por código', ['Ano','Código','Disciplina','Créditos','Períodos','Níveis','Total de alunos'],
+    [...grp.values()].sort((a,b)=>a.Ano-b.Ano || a.cod.localeCompare(b.cod)).map(g=>[g.Ano, g.cod, g.nome, g.cred, [...g.per].sort().join(', '), [...g.niv].sort().join(', '), g.alunos]));
+}
+function renderCapg(){
+  if(!$('#resumoCapg')) return;
+  const d = capg(), linhas = [];
+  Object.keys(CAPG_TIPOS).forEach(t=>Object.entries(d[t]||{}).sort().forEach(([ano,l])=>{
+    const n = re => l.filter(r=>re.test(r['Nível']||'')).length;
+    linhas.push(`<tr><td>${esc(CAPG_TIPOS[t].nome)}</td><td>${ano||'?'}</td><td class="n">${l.length}</td>
+      <td class="n">${t==='disciplinas' ? new Set(l.map(r=>r['Código'])).size+' disc.' : n(/^mestrado/i)}</td><td class="n">${t==='disciplinas' ? '' : n(/^doutorado/i)}</td><td class="n">${t==='disciplinas' ? '' : n(/p[oó]s-?doutorado/i)}</td></tr>`);
+  }));
+  $('#resumoCapg').innerHTML = linhas.length ? `<div class="tblwrap"><table><tr><th>Planilha</th><th>Ano</th><th>Linhas</th><th>Mestrado</th><th>Doutorado</th><th>Pós-doc</th></tr>${linhas.join('')}</table></div>
+    <p class="sub" style="margin-top:6px">Entram no Excel consolidado as abas: Discentes ativos, Ingressantes, Titulados, Pós-doutorandos, Disciplinas oferecidas e Disciplinas por código (filtradas pelo ano-base escolhido).</p>`
+    : '<p class="sub">Nenhuma planilha do CAPG importada.</p>';
+  setTimeout(renderDashboard, 0);
+}
+function initCapgUI(){
+  $('#arquivosCapg').onchange = async e=>{
+    const ok=[], erros=[];
+    for(const f of e.target.files){
+      try{ const r = lerCapg(f.name, await f.arrayBuffer());
+        Object.entries(r.porAno).forEach(([ano,l])=>{ (capg()[r.tipo] ||= {})[ano] = l; });
+        ok.push(`${CAPG_TIPOS[r.tipo].nome} (${f.name})`); }
+      catch(err){ erros.push(`${f.name} (${err.message})`); }
+    }
+    e.target.value='';
+    if(!store.set(LS_ADMIN, admin)) erros.push('o navegador não conseguiu guardar tudo; exporte o Excel antes de fechar');
+    $('#msgCapg').innerHTML = `<div class="msg ${erros.length?'err':'ok'}">${ok.length ? 'Importado: '+esc(ok.join('; ')) : ''}${erros.length ? (ok.length?'. ':'')+'Problemas: '+esc(erros.join('; ')) : ''}</div>`;
+    renderCapg();
+  };
+  $('#btnLimparCapg').onclick = async ()=>{
+    if(!await confirmar('Limpar planilhas do CAPG', '<p>Remove as planilhas do CAPG importadas neste navegador.</p>', 'Limpar')) return;
+    admin.capg = {}; store.set(LS_ADMIN, admin); $('#msgCapg').innerHTML=''; renderCapg();
+  };
+}
+
+/* =====================================================================
+   DASHBOARD — indicadores do ano-base escolhido no painel
+   Cores validadas (azul, laranja, verde): passam nas checagens de daltonismo
+   com rótulos/legenda e espaço de 2px entre segmentos.
+   ===================================================================== */
+const DASH_SERIES = [{nome:'Doutorado', cor:'#0B6E94'}, {nome:'Mestrado', cor:'#D9892B'}, {nome:'Pós-doc', cor:'#3E8E5A'}];
+function nivelSerie(n){ return /p[oó]s-?doutorado/i.test(n||'') ? 2 : /^mestrado/i.test(n||'') ? 1 : 0; }
+function kpi(rotulo, valor, detalhe){ return `<div class="kpi"><div class="kpi-r">${esc(rotulo)}</div><div class="kpi-v">${valor}</div><div class="kpi-d">${detalhe||'&nbsp;'}</div></div>`; }
+function legenda(series){ return `<div class="dash-leg">${series.map(s=>`<span><i style="background:${s.cor}"></i>${esc(s.nome)}</span>`).join('')}</div>`; }
+function barras(linhas, series, vazio){
+  if(!linhas.length) return `<p class="sub">${vazio}</p>`;
+  const max = Math.max(...linhas.map(l=>l.v.reduce((a,b)=>a+b,0)), 1);
+  return `<div class="dash-bars">${linhas.map(l=>{ const tot = l.v.reduce((a,b)=>a+b,0);
+    const det = series.map((s,i)=>l.v[i] ? `${s.nome}: ${l.v[i]}` : '').filter(Boolean).join(' · ');
+    return `<div class="dash-row"><div class="dash-lab" title="${esc(l.full||l.r)}">${esc(l.r)}</div>
+      <div class="dash-track">${l.v.map((v,i)=>v ? `<span class="dash-seg" style="width:${v/max*100}%;background:${series[i].cor}" data-tip="${esc(l.full||l.r)} — ${esc(series[i].nome)}: ${v}"></span>` : '').join('')}</div>
+      <div class="dash-tot" title="${esc(det)}">${tot}</div></div>`; }).join('')}</div>`;
+}
+// nome curto: primeiro + último sobrenome, mantendo partículas ("Marco Di Luccio", "Débora de Oliveira")
+const nomeCurto = n => { const t = String(n).split(' '); if(t.length<=2) return n;
+  const pre = t[t.length-2]; return /^(de|da|do|dos|das|di|del|van|von)$/i.test(pre) ? `${t[0]} ${pre} ${t[t.length-1]}` : `${t[0]} ${t[t.length-1]}`; };
+// agrupa nomes que só diferem por acento/maiúsculas (ex.: "José" e "Jose")
+function agrupar(lista, chave, idx){
+  const m = new Map();
+  lista.forEach(r=>{ const nome = chave(r), k = norm(nome); const g = m.get(k) || {r:nome, v:[0,0,0]};
+    if(/[À-ú]/.test(nome) && !/[À-ú]/.test(g.r)) g.r = nome; g.v[idx(r)]++; m.set(k,g); });
+  return [...m.values()].sort((a,b)=>b.v.reduce((x,y)=>x+y,0)-a.v.reduce((x,y)=>x+y,0));
+}
+function agenciaBolsa(b){
+  if(!b) return 'Sem bolsa';
+  // vários períodos ("FAPESC(36), CAPES - PROEX(12)") → a de mais meses
+  const partes = b.split(/,\s*/).map(x=>({t:x.replace(/\(\d+\)\s*$/,'').trim(), m:+((/\((\d+)\)/.exec(x)||[])[1]||0)}));
+  const t = partes.sort((a,b)=>b.m-a.m)[0].t;
+  return /^capes/i.test(t) ? 'CAPES' : /^cnpq/i.test(t) ? 'CNPq' : /^fapesc/i.test(t) ? 'FAPESC' : /afirmativ/i.test(t) ? 'Ações afirmativas' : 'Outras';
+}
+function renderDashboard(){
+  const el = $('#dashCorpo'); if(!el) return;
+  const anos = anosFiltro(), rot = anos.length===1 ? anos[0] : `${anos[0]}–${anos[anos.length-1]}`;
+  const reg = capgAno('regulares'), ing = capgAno('ingressantes'), con = capgAno('concluintes');
+  const ativos = reg.filter(r=>!ehPosDoc(r)), pdAt = reg.filter(ehPosDoc), ingD = ing.filter(r=>!ehPosDoc(r)), tit = con.filter(r=>!ehPosDoc(r));
+  const conta = (l, re) => l.filter(r=>re.test(r['Nível']||'')).length;
+  const media = l => { const v = l.map(r=>+r['Tempo conclusão']).filter(x=>x>0); return v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : null; };
+  const mM = media(tit.filter(r=>/^mestrado/i.test(r['Nível']))), mD = media(tit.filter(r=>/^doutorado/i.test(r['Nível'])));
+  const wos = wosFiltrado(), intl = wos.filter(w=>w.paises && w.paises.split('; ').some(p=>p && !/^brazil$/i.test(p))).length;
+  const pats = Object.keys(fontes().lattes).length ? patentesLattes().length : null;
+  const cvs = Object.values(fontes().lattes), prazo = prazoLattesData();
+  const ymd = v => /^\d{8}$/.test(v) ? v.slice(4)+v.slice(2,4)+v.slice(0,2) : '';
+  const resp = new Set(pacotesFiltrados().filter(p=>p.origem!=='secretaria').map(p=>p.docente.nome));
+  const temCapg = reg.length || ing.length || con.length;
+  const desist = ingD.filter(r=>/desist/i.test(r['Situação aluno']||'')).length;
+
+  let h = `<div class="kpis">
+    ${kpi('Discentes ativos', temCapg ? ativos.length : '—', temCapg ? `${conta(ativos,/^doutorado/i)} doutorado · ${conta(ativos,/^mestrado/i)} mestrado` : 'importe as planilhas do CAPG')}
+    ${kpi(`Ingressantes ${rot}`, temCapg ? ingD.length : '—', temCapg ? `${conta(ingD,/^doutorado/i)} D · ${conta(ingD,/^mestrado/i)} M${desist?` · ${desist} desistência(s)`:''}` : '')}
+    ${kpi(`Titulados ${rot}`, temCapg ? tit.length : '—', temCapg ? [mD!==null?`D em ${mD} meses`:'', mM!==null?`M em ${mM} meses`:''].filter(Boolean).join(' · ') + (mD!==null||mM!==null ? ' (média)' : '') : '')}
+    ${kpi('Pós-doutorandos ativos', temCapg ? pdAt.length : '—', temCapg ? `${con.filter(ehPosDoc).length} finalizado(s) no ano` : '')}
+    ${kpi(`Publicações WoS ${rot}`, Object.keys(fontes().wos).length ? wos.length : '—', Object.keys(fontes().wos).length ? `${intl} com coautoria internacional (${wos.length?Math.round(intl/wos.length*100):0}%)` : 'importe a exportação do WoS')}
+    ${kpi(`Patentes ${rot}`, pats===null ? '—' : pats, pats===null ? 'importe os Lattes' : `de ${cvs.length} currículo(s) importado(s)`)}
+    ${kpi('Coleta dos docentes', `${resp.size}<small>/${CONFIG.docentes.length}</small>`, 'responderam o formulário')}
+    ${kpi('Lattes importados', `${cvs.filter(c=>CONFIG.docentes.includes(c.docente)).length}<small>/${CONFIG.docentes.length}</small>`, prazo ? `${cvs.filter(c=>ymd(c.atualizado) && ymd(c.atualizado)<=prazo).length} atualizados até ${CONFIG.prazoLattes}` : 'defina prazoLattes para ver o prazo')}
+  </div>`;
+
+  // orientandos por docente
+  const linDoc = agrupar(reg, r=>r['Orientador'] || '(sem orientador)', r=>nivelSerie(r['Nível'])).map(g=>({r:nomeCurto(g.r), full:g.r, v:g.v}));
+  // publicações WoS por docente
+  const pubDoc = new Map(CONFIG.docentes.map(d=>[d,0]));
+  wos.forEach(w=>w.docentes.forEach(d=>pubDoc.set(d,(pubDoc.get(d)||0)+1)));
+  const linPub = Object.keys(fontes().wos).length ? [...pubDoc.entries()].map(([d,n])=>({r:nomeCurto(d), full:d, v:[n]})).sort((a,b)=>b.v[0]-a.v[0]) : [];
+  // por linha
+  const linLinha = agrupar(ativos, r=>(r['Linha de pesquisa'] && !/^n[aã]o definida/i.test(r['Linha de pesquisa'])) ? r['Linha de pesquisa'] : '(não definida)', r=>nivelSerie(r['Nível']));
+  // bolsas
+  const linBolsa = agrupar(ativos, r=>agenciaBolsa(r['Bolsa']), r=>nivelSerie(r['Nível']));
+
+  const serDM = DASH_SERIES.slice(0,2), semCapg = 'Importe as planilhas do CAPG para ver este gráfico.';
+  h += `<div class="dash-grid">
+    <div class="dash-box"><h3>Orientandos ativos por docente</h3>${legenda(DASH_SERIES)}${barras(linDoc, DASH_SERIES, semCapg)}</div>
+    <div class="dash-box"><h3>Publicações no WoS por docente (${rot})</h3><p class="sub" style="margin:0 0 8px">Artigos em coautoria contam para cada docente.</p>${barras(linPub, [{nome:'Publicações', cor:'#0B6E94'}], 'Importe a exportação do Web of Science para ver este gráfico.')}</div>
+    <div class="dash-box dash-larga"><h3>Discentes ativos por linha de pesquisa</h3>${legenda(serDM)}${barras(linLinha, serDM, semCapg)}</div>
+    <div class="dash-box"><h3>Discentes ativos por agência de bolsa</h3><p class="sub" style="margin:0 0 8px">Com mais de uma bolsa, conta a de mais meses.</p>${legenda(serDM)}${barras(linBolsa, serDM, semCapg)}</div>
+  </div>`;
+  el.innerHTML = h;
+  renderEvolucao();
+}
+/* ---------- evolução no quadriênio (pequenos múltiplos, um por indicador) ---------- */
+function serieAno(tipo, filtro){
+  const d = capg()[tipo] || {};
+  return CONFIG.anos.map(a=>{ const l = d[a]; if(!l) return null;
+    const x = l.filter(filtro); return [x.filter(r=>/^doutorado/i.test(r['Nível'])).length, x.filter(r=>/^mestrado/i.test(r['Nível'])).length, x.filter(ehPosDoc).length]; });
+}
+function miniAnos(titulo, valores, series, nota){
+  const tot = valores.map(v=>v ? v.reduce((a,b)=>a+b,0) : null);
+  const max = Math.max(1, ...tot.filter(x=>x!==null));
+  const H = 90;
+  return `<div class="evo-box"><h4>${esc(titulo)}</h4>
+    <div class="evo-plot">${CONFIG.anos.map((a,i)=>{ const v = valores[i];
+      if(!v) return `<div class="evo-col"><div class="evo-val evo-nd">—</div><div class="evo-bar" style="height:${H}px"></div></div>`;
+      const segs = v.map((n,j)=>n ? `<span class="evo-seg" style="height:${n/max*H}px;background:${series[j].cor}" data-tip="${a} — ${esc(series[j].nome)}: ${n}"></span>` : '').reverse().join('');
+      return `<div class="evo-col"><div class="evo-val">${tot[i]}</div><div class="evo-bar" style="height:${H}px">${segs}</div></div>`; }).join('')}</div>
+    <div class="evo-anos">${CONFIG.anos.map(a=>`<span>${a}</span>`).join('')}</div>
+    ${nota ? `<div class="evo-nota">${nota}</div>` : ''}</div>`;
+}
+function renderEvolucao(){
+  const el = $('#dashEvo'); if(!el) return;
+  const temAno = a => ['regulares','ingressantes','concluintes'].some(t=>(capg()[t]||{})[a]) || Object.values(fontes().wos).some(w=>w.ano===a);
+  const anosComDados = CONFIG.anos.filter(temAno);
+  if(anosComDados.length < 2){
+    el.innerHTML = `<p class="sub">A evolução aparece quando houver dados de pelo menos 2 anos do quadriênio (hoje: ${anosComDados.join(', ') || 'nenhum'}). Importe as planilhas do CAPG e a exportação do WoS de cada ano.</p>`; return;
+  }
+  const DM = DASH_SERIES.slice(0,2), PD = [DASH_SERIES[2]], PUB = [{nome:'Publicações', cor:'#0B6E94'}];
+  const so = (l,i) => l.map(v=>v ? i.map(k=>v[k]) : null);
+  const wosAno = CONFIG.anos.map(a=>{ const l = Object.values(fontes().wos).filter(w=>w.ano===a); return l.length ? [l.length] : null; });
+  const intl = CONFIG.anos.map(a=>{ const l = Object.values(fontes().wos).filter(w=>w.ano===a); if(!l.length) return null;
+    return [Math.round(l.filter(w=>w.paises && w.paises.split('; ').some(p=>p && !/^brazil$/i.test(p))).length/l.length*100)]; });
+  const temLattes = Object.keys(fontes().lattes).length;
+  const patAno = CONFIG.anos.map(a=>{ if(!temLattes) return null;
+    const ks = new Set(); Object.values(fontes().lattes).forEach(cv=>cv.patentes.forEach(p=>{
+      if([p.ano, anoDeDataLattes(p.deposito), anoDeDataLattes(p.concessao)].includes(a)) ks.add(p.codigo ? norm(p.codigo) : norm(p.titulo)); }));
+    return [ks.size]; });
+  el.innerHTML = `${legenda(DASH_SERIES)}<div class="evo-grid">
+    ${miniAnos('Discentes ativos', so(serieAno('regulares', r=>!ehPosDoc(r)),[0,1]), DM)}
+    ${miniAnos('Ingressantes', so(serieAno('ingressantes', r=>!ehPosDoc(r)),[0,1]), DM)}
+    ${miniAnos('Titulados', so(serieAno('concluintes', r=>!ehPosDoc(r)),[0,1]), DM)}
+    ${miniAnos('Pós-doutorandos ativos', so(serieAno('regulares', ehPosDoc),[2]), PD)}
+    ${miniAnos('Publicações no WoS', wosAno, PUB)}
+    ${miniAnos('Coautoria internacional no WoS (%)', intl, PUB)}
+    ${miniAnos('Patentes (Lattes)', patAno, [{nome:'Patentes', cor:'#0B6E94'}], temLattes ? 'Depósito, concessão ou desenvolvimento no ano.' : 'Importe os Lattes.')}
+  </div><p class="sub" style="margin-top:6px">“—” = ano sem dados importados. Cada gráfico tem sua própria escala.</p>`;
+}
+
+function initDashboard(){
+  const tip = document.createElement('div'); tip.className = 'dash-tip'; document.body.appendChild(tip);
+  document.addEventListener('mousemove', e=>{
+    const s = e.target.closest && e.target.closest('[data-tip]');
+    if(!s){ tip.style.display='none'; return; }
+    tip.textContent = s.dataset.tip; tip.style.display='block';
+    tip.style.left = Math.min(e.clientX+12, innerWidth - tip.offsetWidth - 8)+'px'; tip.style.top = (e.clientY+14)+'px';
+  });
+}
+
 /* ---------- início ---------- */
-initIdent(); initBarra(); initAdminUI(); initFontesUI();
+initIdent(); initBarra(); initAdminUI(); initFontesUI(); initCapgUI(); initDashboard();
+$('#btnSairSec').onclick = ()=>{ try{ sessionStorage.removeItem('ppgeal-sec'); }catch(e){} window._sec = false; location.hash = ''; };
 $('#formSenha').addEventListener('submit', async e=>{
   e.preventDefault();
   if(await sha256($('#campoSenha').value) === CONFIG.senhaSecretariaHash){
