@@ -335,7 +335,7 @@ code{background:#eef1f5;padding:1px 5px;border-radius:4px;font-size:.88em}
         <li>Escolha seu nome e o ano-base.</li>
         <li>Clique em cada categoria e cadastre suas atividades. Se não teve nenhuma, marque “Não tive atividades nesta categoria”.</li>
         <li>Quando todas as categorias mostrarem selo verde (itens) ou cinza (sem atividades), clique em <b>Gerar arquivo para a secretaria</b>.</li>
-        <li>Envie o arquivo <code>.json</code> baixado para <b class="emailSec"></b>. A página oferece um botão que abre seu e-mail já endereçado à secretaria; basta anexar o arquivo.</li>
+        <li>Envie o arquivo <code>.json</code> baixado para <b class="emailSec"></b>. A página oferece botões que abrem o e-mail (Gmail, Outlook ou o programa do computador) já endereçado à secretaria; basta anexar o arquivo.</li>
       </ol>
       <p>Uma atividade com vários docentes do PPGEAL (um evento, uma ação de extensão) pode ser cadastrada só pelo(a) coordenador(a).</p>
       <p>Quer ver como fica? Abra o <a href="#exemplo">exemplo preenchido</a>, um docente fictício com uma atividade em cada categoria.</p>
@@ -1022,11 +1022,19 @@ async function enviar(){
     estado.enviadoEm = p.enviadoEm; estado.alteradoEm = p.enviadoEm; store.set(chaveLocal(), estado); atualizarStatusEnvio();
     const assunto = `Coleta Sucupira ${p.ano} – ${p.docente.nome}`;
     const corpo = `Olá,\n\nSegue em anexo o arquivo da coleta Sucupira do ano-base ${p.ano} (${nomeArquivo('json')}).\n\nAtenciosamente,\n${p.docente.nome}`;
-    const mailto = `mailto:${CONFIG.emailSecretaria}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+    const enc = encodeURIComponent, para = CONFIG.emailSecretaria;
+    const mailto = `mailto:${para}?subject=${enc(assunto)}&body=${enc(corpo)}`;
+    const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${enc(para)}&su=${enc(assunto)}&body=${enc(corpo)}`;
+    const outlook = `https://outlook.office.com/mail/deeplink/compose?to=${enc(para)}&subject=${enc(assunto)}&body=${enc(corpo)}`;
     await confirmar('Arquivo gerado', `<p>O arquivo <code>${esc(nomeArquivo('json'))}</code> foi baixado (pasta Downloads).</p>
       <p><b>Último passo:</b> envie esse arquivo para <b>${esc(CONFIG.emailSecretaria)}</b>.</p>
-      <p><a href="${mailto}"><button type="button">Abrir e-mail para a secretaria</button></a></p>
-      <p class="sub">O botão abre seu programa de e-mail já com destinatário, assunto e texto. Só falta <b>anexar o arquivo</b> (o navegador não permite anexar sozinho). Se o botão não abrir nada, escreva para o endereço acima pelo Gmail/Outlook e anexe o arquivo.</p>
+      <p class="sub" style="margin-bottom:6px">Abrir o e-mail já preenchido (destinatário, assunto e texto) em:</p>
+      <div class="row" style="margin-bottom:10px">
+        <a href="${gmail}" target="_blank" rel="noopener"><button type="button">Gmail</button></a>
+        <a href="${outlook}" target="_blank" rel="noopener"><button type="button" class="sec">Outlook</button></a>
+        <a href="${mailto}"><button type="button" class="sec">Programa de e-mail do computador</button></a>
+      </div>
+      <p class="sub">Depois, é só <b>anexar o arquivo</b> que foi baixado (o navegador não permite anexar sozinho) e enviar.</p>
       <p class="sub">Se precisar corrigir algo depois, edite aqui e gere um novo arquivo: o mais recente substitui o anterior.</p>`, 'Fechar', false);
     return;
   }
